@@ -21,6 +21,9 @@ export interface GameState {
   tasksDone: string[];
   claimedMilestones: number[];
   sound: boolean;
+  passXp: number;
+  passLevel: number;
+  premium: boolean;
 }
 
 const initial = (): GameState => ({
@@ -28,6 +31,7 @@ const initial = (): GameState => ({
   parts: { head: 0, body: 0, gear: 0 },
   lastSpinRegen: Date.now(), lastSoloClaim: Date.now(),
   tasksDone: [], claimedMilestones: [], sound: true,
+  passXp: 0, passLevel: 1, premium: false,
 });
 
 /** Solo per hour grows with character upgrades and level. */
@@ -56,6 +60,20 @@ export function slotPayout(r: Sym[], bet: number) {
   return out;
 }
 
+/** Spin pass: XP needed to finish a level grows with level. */
+export function passNeed(level: number) { return Math.round(100 * Math.pow(1.35, level - 1)); }
+/** Gift for reaching a new pass level; premium players get double plus a ticket. */
+export function passGift(level: number, premium: boolean) {
+  const base = { coins: 1000 * level, spins: 5 + Math.floor(level / 2), tickets: 0 };
+  return premium ? { coins: base.coins * 2, spins: base.spins * 2, tickets: 1 } : base;
+}
+/** Add XP (1 per spin used), rolling over levels. Returns new xp/level and total gifts earned. */
+export function addPassXp(xp: number, level: number, add: number, premium: boolean) {
+  let x = xp + add, l = level; const gift = { coins: 0, spins: 0, tickets: 0 };
+  while (x >= passNeed(l)) { x -= passNeed(l); l += 1; const g = passGift(l, premium); gift.coins += g.coins; gift.spins += g.spins; gift.tickets += g.tickets; }
+  return { xp: x, level: l, gift, levelsUp: l - level };
+}
+
 export const MILESTONES = [
   { at: 10, label: "500 Coins", reward: { coins: 500 } },
   { at: 30, label: "5 Spins", reward: { spins: 5 } },
@@ -80,6 +98,7 @@ interface Ctx {
   completeTask: (id: string, r: Reward) => void;
   claimMilestone: (i: number) => void;
   toggleSound: () => void;
+  gainPass: (spinsUsed: number) => number;
 }
 const GameCtx = createContext<Ctx | null>(null);
 const KEY = "solo-slots-v1";
@@ -126,6 +145,11 @@ export function GameProvider({ children }: { children: ReactNode }) {
     });
     return ok && (r.coins ?? 0) <= s.coins && (r.spins ?? 0) <= s.spins && (r.tickets ?? 0) <= s.tickets;
   }, [s]);
+  const gainPass = useCallback((n: number) => {
+    const r = addPassXp(s.passXp, s.passLevel, n, s.premium);
+    setS((p) => ({ ...p, passXp: r.xp, passLevel: r.level, coins: p.coins + r.gift.coins, spins: p.spins + r.gift.spins, tickets: p.tickets + r.gift.tickets }));
+    return r.levelsUp ? r.level : 0;
+  }, [s.passXp, s.passLevel, s.premium]);
   const claimSolo = useCallback(() => {
     const amt = pendingSolo;
     setS((p) => ({ ...p, solo: p.solo + amt, lastSoloClaim: Date.now() }));
