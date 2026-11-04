@@ -3,7 +3,10 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { Screen } from "@/components/game/Shell";
 import { useGame, beep, haptic } from "@/lib/game";
-import { ART } from "@/lib/art";
+import prizeBolt from "@/assets/wheel-prize-bolt.png";
+import prizeCoin from "@/assets/wheel-prize-coin.png";
+import prizeGem from "@/assets/wheel-prize-gem.png";
+import prizeChest from "@/assets/wheel-prize-chest.png";
 import { Button } from "@/components/ui/button";
 import { Star, Ticket } from "lucide-react";
 import mascot from "@/assets/merge-mascot-3.png";
@@ -24,6 +27,7 @@ export const Route = createFileRoute("/wheel")({
 });
 
 const PRIZES = WHEEL_PRIZES;
+const prizeArt = { bolt: prizeBolt, coin: prizeCoin, gem: prizeGem, chest: prizeChest };
 function WheelPage() {
   const { s, spend, grant } = useGame();
   const [rot, setRot] = useState(0);
@@ -39,7 +43,7 @@ function WheelPage() {
     setTimeout(() => { const p = PRIZES[idx]; if (p) { grant(p.reward); beep(s.sound, 1000, 0.3); setWinner(p.label); toast.success(`You won ${p.label}!`); } setBusy(false); }, 4200);
   };
   return (
-    <Screen bare scroll={false}>
+    <Screen bare scroll={false} center={<Button onClick={go} disabled={busy} className="fortune-nav-spin" aria-label="Spin prize wheel">{busy ? "..." : "SPIN"}</Button>}>
       <div className="fortune-page">
         <h1 className="fortune-title">WHEEL OF FORTUNE</h1>
         <div className="fortune-stage">
@@ -53,7 +57,7 @@ function WheelPage() {
             {PRIZES.map((p, i) => (
               <div key={i} className="fortune-prize" style={{ transform: `translateX(-50%) rotate(${i * seg}deg)` }}>
                 <div className="fortune-prize-content">
-                  {p.kind === "ticket" ? <Ticket className="fortune-ticket-prize" /> : <img src={ART[p.kind]} alt="" />}
+                  {p.kind === "ticket" ? <Ticket className="fortune-ticket-prize" /> : <img src={prizeArt[p.kind]} alt="" />}
                   <span>{p.label}</span>
                 </div>
               </div>
@@ -64,7 +68,6 @@ function WheelPage() {
         </div>
         <div className="fortune-controls">
           <span className="fortune-result" role="status">{winner ? `+${winner}` : ""}</span>
-          <Button onClick={go} disabled={busy} className="fortune-spin" aria-label="Spin prize wheel">{busy ? "SPINNING" : "SPIN"}</Button>
           <span className="fortune-tickets"><Ticket size={16} />{s.tickets} {s.tickets === 1 ? "ticket" : "tickets"}</span>
         </div>
       </div>
