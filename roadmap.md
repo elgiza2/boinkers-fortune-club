@@ -7,3 +7,4 @@
 - [ ] Fire Pass page (FREE progress bar) — later
 - [x] Slot machine exterior: clean iOS style (glass, soft radius)
 - [ ] Pass bar: smaller, custom FREE tag + level badge
+- [ ] Top box: welcome user; show win cleanly after spin
