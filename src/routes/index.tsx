@@ -163,7 +163,7 @@ function Home() {
                 <div className="absolute inset-x-1 top-0.5 h-1 rounded-full bg-cream/30" />
                 <span className="absolute inset-0 grid place-items-center font-display text-[10px] leading-none text-cream text-outline">{fmt(s.passXp)}/{fmt(passNeed(s.passLevel))}</span>
               </div>
-              <span className={`relative z-10 -ml-2 grid h-8 w-8 rotate-45 place-items-center rounded-[9px] border-2 border-ink bg-gradient-to-br from-sun to-sun-dark ${levelUp ? "ring-4 ring-sun/50" : ""} shadow-[0_2px_0_var(--ink),inset_0_2px_0_oklch(1_0_0/.5)]">
+              <span className={`relative z-10 -ml-2 grid h-8 w-8 rotate-45 place-items-center rounded-[9px] border-2 border-ink bg-gradient-to-br from-sun to-sun-dark ${levelUp ? "ring-4 ring-sun/50" : ""} shadow-[0_2px_0_var(--ink),inset_0_2px_0_oklch(1_0_0/.5)]`}>
                 <span className="-rotate-45 font-display text-sm leading-none text-cream text-outline">{s.passLevel}</span>
               </span>
             </Link>
