@@ -1,10 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import { Crown, Skull, Ticket } from "lucide-react";
+import { Crown, Ticket } from "lucide-react";
+import hero from "@/assets/hero-character.png";
 import { Screen } from "@/components/game/Shell";
 import { SYMBOLS, type Sym, slotPayout, useGame, fmt, beep, haptic, passNeed } from "@/lib/game";
-import { SYM_ART } from "@/lib/art";
+import { ART, SYM_ART } from "@/lib/art";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -33,7 +34,12 @@ function Home() {
   const [reels, setReels] = useState<Sym[]>(["bolt", "coin", "chest"]);
   const [spinning, setSpinning] = useState([false, false, false]);
   const [bet, setBet] = useState(1);
-  const [win, setWin] = useState<string | null>(null);
+  const [win, setWin] = useState<{ coins: number; spins: number; tickets: number; k: number } | null>(null);
+  const [name, setName] = useState("Player");
+  useEffect(() => {
+    const u = (window as unknown as { Telegram?: { WebApp?: { initDataUnsafe?: { user?: { first_name?: string } } } } }).Telegram?.WebApp?.initDataUnsafe?.user;
+    if (u?.first_name) setName(u.first_name);
+  }, []);
   const [shake, setShake] = useState(false);
   const [auto, setAuto] = useState(false);
   const holdT = useRef<ReturnType<typeof setTimeout>>(undefined);
@@ -57,7 +63,7 @@ function Home() {
         if (p.coins || p.spins || p.tickets) {
           setShake(true); setTimeout(() => setShake(false), 650);
           beep(s.sound, 900, 0.25);
-          setWin([p.coins && `+${fmt(p.coins)} COINS`, p.spins && `+${p.spins} SPINS`, p.tickets && `+${p.tickets} TICKET`].filter(Boolean).join("  "));
+          setWin({ coins: p.coins, spins: p.spins, tickets: p.tickets, k: Date.now() });
         }
       }
     }, 700 + i * 350));
@@ -97,15 +103,25 @@ function Home() {
         <div className={`w-full max-w-[360px] ${shake ? "animate-shake" : ""}`}>
           <div className="rounded-[32px] border border-cream/20 bg-cream/10 p-3 shadow-[0_20px_50px_-12px_oklch(0_0_0/.6),inset_0_1px_0_oklch(1_0_0/.25)] backdrop-blur-2xl">
             {/* status / winner */}
-            <div className="flex h-14 items-center gap-3 rounded-[20px] bg-ink/40 px-3">
-              {win ? <span key={win} className="animate-pop w-full text-center text-base font-semibold text-sun">{win}</span> : (
+            <div className="flex h-14 items-center gap-3 overflow-hidden rounded-[20px] bg-ink/40 px-3">
+              {win ? (
+                <div key={win.k} className="animate-pop flex w-full items-center justify-center gap-2">
+                  <span className="font-display text-xs tracking-wider text-cream/70">YOU WON</span>
+                  {([["coins", ART.coin], ["spins", ART.bolt], ["tickets", ART.gem]] as const).filter(([k]) => win[k] > 0).map(([k, img]) => (
+                    <span key={k} className="flex items-center gap-1 rounded-full bg-cream/15 py-0.5 pl-0.5 pr-2.5">
+                      <img src={img} alt="" className="h-7 w-7 object-contain" />
+                      <span className="font-display text-base leading-none text-sun">+{fmt(win[k])}</span>
+                    </span>
+                  ))}
+                </div>
+              ) : (
                 <>
-                  <span className="grid h-9 w-9 place-items-center rounded-full bg-cream/15"><Skull className="h-5 w-5 text-cream" /></span>
-                  <div className="leading-tight">
-                    <div className="text-[11px] font-medium uppercase tracking-wider text-cream/60">Top winner</div>
-                    <div className="text-sm font-semibold text-cream">CozyInk5 <span className="text-sun">· 2M</span></div>
+                  <img src={hero} alt="" className="h-10 w-10 rounded-full bg-cream/15 object-cover object-top" />
+                  <div className="min-w-0 leading-tight">
+                    <div className="text-[11px] font-medium uppercase tracking-wider text-cream/60">Welcome back</div>
+                    <div className="truncate font-display text-base text-cream">{name}</div>
                   </div>
-                  <span className="ml-auto rounded-full bg-cream/15 px-2.5 py-1 text-xs font-semibold text-cream">Bet x{bet}</span>
+                  <span className="ml-auto rounded-full bg-cream/15 px-2.5 py-1 text-xs font-semibold text-cream">Good luck!</span>
                 </>
               )}
             </div>
