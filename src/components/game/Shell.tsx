@@ -39,17 +39,14 @@ function Pill({ icon, value }: { icon: string; value: string }) {
 }
 
 type To = "/" | "/upgrade" | "/earn" | "/nft" | "/wheel";
-function NavItem({ icon, label, to, dot, divider }: { icon: string; label: string; to: To; dot?: boolean; divider?: "l" | "r" }) {
+function NavItem({ icon, label, to, divider }: { icon: string; label: string; to: To; divider?: "l" | "r" }) {
   return (
     <Link
       to={to}
       activeOptions={{ exact: true }}
       className={`group flex flex-col items-center justify-center gap-1 border-ink/60 ${divider === "r" ? "border-r-2" : divider === "l" ? "border-l-2" : ""}`}
     >
-      <span className="relative">
-        <img src={icon} alt="" className="h-10 w-10 object-contain transition-transform group-active:scale-90 group-data-[status=active]:scale-110" />
-        {dot && <span className="absolute -right-0.5 -top-0.5 h-3.5 w-3.5 rounded-full border-2 border-ink bg-berry" />}
-      </span>
+      <img src={icon} alt="" className="h-10 w-10 object-contain transition-transform group-active:scale-90 group-data-[status=active]:scale-110" />
       <span className="font-display text-[11px] leading-none text-muted-foreground group-data-[status=active]:text-sun">{label}</span>
     </Link>
   );
