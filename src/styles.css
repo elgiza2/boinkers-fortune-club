@@ -214,7 +214,7 @@ body { font-family: var(--font-sans); }
 
 .fortune-page { height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 12px 10px 68px; }
 .fortune-title { flex-shrink: 0; font-family: var(--font-display); font-size: 26px; line-height: 1.2; color: var(--cream); -webkit-text-stroke: 1px var(--ink); paint-order: stroke fill; text-shadow: 0 3px 0 var(--ink); text-align: center; }
-.fortune-stage { width: min(100%, 390px, calc((100dvh - 312px) / 1.13)); aspect-ratio: 1 / 1.13; position: relative; flex-shrink: 0; margin-top: 17px; }
+.fortune-stage { width: min(100%, 390px, calc((100dvh - 338px) / 1.13)); aspect-ratio: 1 / 1.13; position: relative; flex-shrink: 0; margin-top: 17px; }
 .fortune-wheel { width: 100%; aspect-ratio: 1; position: relative; }
 .fortune-rim { position: absolute; inset: 0; border-radius: 50%; background: var(--wheel-rim-gradient); border: 3px solid var(--ink); box-shadow: var(--wheel-shadow); }
 .fortune-disc { position: absolute; inset: 6.5%; border: 2px solid var(--wheel-blue-light); border-radius: 50%; background: var(--wheel-disc-gradient); transition: transform 4s cubic-bezier(.17,.67,.2,1); overflow: hidden; }
