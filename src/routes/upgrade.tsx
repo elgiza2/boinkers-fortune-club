@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useRef, useState } from "react";
 import { DndContext, DragOverlay, PointerSensor, KeyboardSensor, useSensor, useSensors, useDraggable, useDroppable, closestCenter, type DragEndEvent } from "@dnd-kit/core";
-import { BookOpen, ChevronRight, Gem, LockKeyhole, Plus, Sparkles, X } from "lucide-react";
+import { BookOpen, ChevronRight, Gem, LockKeyhole, Plus } from "lucide-react";
 import { toast } from "sonner";
 import island from "@/assets/merge-island.jpg";
 import { Screen } from "@/components/game/Shell";
@@ -96,8 +96,8 @@ function Upgrade() {
         <Button disabled={!ready || pendingSolo < 1} className="merge-claim" onClick={() => { const amount = claimSolo(); toast.success(`+${fmt(amount)} SOLO collected`); }} aria-label="Collect SOLO"><Gem size={18} /><div><strong>{fmt(pendingSolo)} SOLO</strong><span>Collect</span></div></Button>
       </div>
     </div>
-    <Dialog open={collection} onOpenChange={setCollection}><DialogContent className="merge-collection" showCloseButton={false}>
-      <div className="flex items-center justify-between"><DialogTitle className="font-display text-xl">Creature collection</DialogTitle><Button size="icon" variant="ghost" onClick={() => setCollection(false)} aria-label="Close collection"><X /></Button></div>
+    <Dialog open={collection} onOpenChange={setCollection}><DialogContent className="merge-collection" aria-describedby={undefined}>
+      <DialogTitle className="font-display text-xl">Creature collection</DialogTitle>
       <div className="merge-collection-grid">{CHARACTERS.map((creature, i) => <div key={creature.name} className="merge-collection-item"><Creature level={i + 1} silhouette={i + 1 > best} /><strong>{i + 1 <= best ? creature.name : "Undiscovered"}</strong><span>Lv. {i + 1} · {creature.family}</span><small>{i + 1 <= best ? `${fmt(creature.rate)} SOLO / hr` : <LockKeyhole size={12} />}</small></div>)}</div>
     </DialogContent></Dialog>
   </Screen>;
