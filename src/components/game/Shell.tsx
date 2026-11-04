@@ -85,13 +85,13 @@ export function BottomNav({ center }: { center?: ReactNode }) {
 }
 
 /** Full-height, non-scrolling app frame. `scroll` lets inner pages scroll their content area only. */
-export function Screen({ children, center, bare, scroll = true }: { children: ReactNode; center?: ReactNode; bare?: boolean; scroll?: boolean }) {
+export function Screen({ children, center, bare, scroll = true, navigation = true }: { children: ReactNode; center?: ReactNode; bare?: boolean; scroll?: boolean; navigation?: boolean }) {
   return (
     <div className="relative mx-auto flex h-[100dvh] max-w-md flex-col overflow-hidden bg-night">
       <img src={sky} alt="" aria-hidden className="pointer-events-none absolute inset-0 h-full w-full object-cover" />
       <TopBar />
       <main className={`relative min-h-0 flex-1 ${scroll ? "overflow-y-auto" : "overflow-hidden"} ${bare ? "" : "px-3 py-3"}`}>{children}</main>
-      <BottomNav center={center} />
+      {navigation && <BottomNav center={center} />}
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Screen } from "@/components/game/Shell";
@@ -8,7 +8,7 @@ import prizeCoin from "@/assets/wheel-prize-coin.png";
 import prizeGem from "@/assets/wheel-prize-gem.png";
 import prizeChest from "@/assets/wheel-prize-chest.png";
 import { Button } from "@/components/ui/button";
-import { Star, Ticket } from "lucide-react";
+import { ArrowLeft, Star, Ticket } from "lucide-react";
 import mascot from "@/assets/merge-mascot-3.png";
 import { WHEEL_PRIZES, wheelLandingRotation } from "@/lib/wheel";
 
@@ -43,8 +43,9 @@ function WheelPage() {
     setTimeout(() => { const p = PRIZES[idx]; if (p) { grant(p.reward); beep(s.sound, 1000, 0.3); setWinner(p.label); toast.success(`You won ${p.label}!`); } setBusy(false); }, 4200);
   };
   return (
-    <Screen bare scroll={false} center={<Button onClick={go} disabled={busy} className="fortune-nav-spin" aria-label="Spin prize wheel">{busy ? "..." : "SPIN"}</Button>}>
+    <Screen bare scroll={false} navigation={false}>
       <div className="fortune-page">
+        <Link to="/" className="fortune-back" aria-label="Back to slots"><ArrowLeft size={24} /></Link>
         <h1 className="fortune-title">WHEEL OF FORTUNE</h1>
         <div className="fortune-stage">
           <div className="fortune-stand"><span>SOLO</span></div>
@@ -68,6 +69,7 @@ function WheelPage() {
         </div>
         <div className="fortune-controls">
           <span className="fortune-result" role="status">{winner ? `+${winner}` : ""}</span>
+          <Button onClick={go} disabled={busy} className="fortune-spin" aria-label="Spin prize wheel">{busy ? "SPINNING" : "SPIN"}</Button>
           <span className="fortune-tickets"><Ticket size={16} />{s.tickets} {s.tickets === 1 ? "ticket" : "tickets"}</span>
         </div>
       </div>
