@@ -85,23 +85,31 @@ function Home() {
 
   const spinBtn = (
     <div className="relative h-full w-full">
+      {/* dark ring behind the diamond */}
+      <div className="absolute inset-[6px] rotate-45 rounded-[30px] border-[3px] border-ink bg-night" />
       <button
         onClick={() => { if (auto) setAuto(false); else spin(); }}
         onPointerDown={() => { holdT.current = setTimeout(() => { setAuto(true); toast("Autospin ON — tap to stop"); }, 700); }}
         onPointerUp={() => clearTimeout(holdT.current)} onPointerLeave={() => clearTimeout(holdT.current)}
-        className={`chunk-btn h-full w-full flex-col rounded-[1.6rem] ${auto ? "bg-berry" : "bg-sun"}`}
-        style={{ boxShadow: "inset 0 -6px 0 var(--sun-dark), inset 0 4px 0 oklch(1 0 0 / .55), 0 4px 0 var(--ink)" }}
+        aria-label="Spin"
+        className="group absolute inset-[13px] transition-transform active:scale-95"
       >
-        <span className="block font-display text-[28px] leading-none">{auto ? "STOP" : "SPIN"}</span>
-        <span className="mt-1 block font-display text-[8px] leading-tight text-sun-dark [-webkit-text-stroke:0]">HOLD FOR<br />AUTOSPIN</span>
+        <span
+          className={`absolute inset-0 rotate-45 rounded-[24px] border-[3px] border-ink ${auto ? "bg-berry" : "bg-gradient-to-b from-sun to-sun-dark"}`}
+          style={{ boxShadow: "inset 0 -7px 0 oklch(0 0 0 / .18), inset 0 5px 0 oklch(1 0 0 / .55), 0 4px 0 var(--ink)" }}
+        />
+        <span className="relative flex h-full flex-col items-center justify-center">
+          <span className="font-display text-[30px] leading-none text-cream text-outline">{auto ? "STOP" : "SPIN"}</span>
+          <span className="mt-1 font-display text-[8px] leading-tight text-ink/60">HOLD FOR<br />AUTOSPIN</span>
+        </span>
       </button>
       <button
         onClick={() => setBet((b) => BETS[(BETS.indexOf(b) + 1) % BETS.length]!)}
         aria-label="Change bet"
-        className="absolute -right-4 -top-4 grid h-10 w-10 rotate-45 place-items-center rounded-[10px] border-[3px] border-ink bg-sun"
-        style={{ boxShadow: "inset 0 -4px 0 var(--sun-dark), inset 0 3px 0 oklch(1 0 0 / .5), 0 3px 0 var(--ink)" }}
+        className="absolute -right-5 top-0 grid h-11 w-11 rotate-45 place-items-center rounded-[11px] border-[3px] border-ink bg-gradient-to-b from-sun to-sun-dark transition-transform active:scale-90"
+        style={{ boxShadow: "inset 0 -4px 0 oklch(0 0 0 / .18), inset 0 3px 0 oklch(1 0 0 / .5), 0 3px 0 var(--ink)" }}
       >
-        <span className="-rotate-45 font-display text-sm leading-none text-cream text-outline">x{bet}</span>
+        <span className="-rotate-45 font-display text-base leading-none text-cream text-outline">x{bet}</span>
       </button>
     </div>
   );
