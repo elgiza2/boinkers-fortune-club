@@ -6,3 +6,7 @@
 - [x] No emojis
 - [ ] Fire Pass page (FREE progress bar) — later
 - [x] Slot machine exterior: clean iOS style (glass, soft radius)
+- [x] Pass bar: smaller, custom FREE tag + level badge
+- [x] Top box: welcome user; show win cleanly after spin
+- [x] Pass bar tappable -> /pass gifts page (placeholder); level-up claim indicator
+- [x] 48h rotating event: event token symbol on reels, any hit gives coins + progress, escalating endless gifts, new event/token every 48h

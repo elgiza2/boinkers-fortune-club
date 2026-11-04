@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as EarnRouteImport } from './routes/earn'
+import { Route as PassRouteImport } from './routes/pass'
 import { Route as StickersRouteImport } from './routes/stickers'
 import { Route as UpgradeRouteImport } from './routes/upgrade'
 import { Route as WheelRouteImport } from './routes/wheel'
@@ -23,6 +24,11 @@ const IndexRoute = IndexRouteImport.update({
 const EarnRoute = EarnRouteImport.update({
   id: '/earn',
   path: '/earn',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PassRoute = PassRouteImport.update({
+  id: '/pass',
+  path: '/pass',
   getParentRoute: () => rootRouteImport,
 } as any)
 const StickersRoute = StickersRouteImport.update({
@@ -44,6 +50,7 @@ const WheelRoute = WheelRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/earn': typeof EarnRoute
+  '/pass': typeof PassRoute
   '/stickers': typeof StickersRoute
   '/upgrade': typeof UpgradeRoute
   '/wheel': typeof WheelRoute
@@ -51,6 +58,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/earn': typeof EarnRoute
+  '/pass': typeof PassRoute
   '/stickers': typeof StickersRoute
   '/upgrade': typeof UpgradeRoute
   '/wheel': typeof WheelRoute
@@ -59,21 +67,23 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/earn': typeof EarnRoute
+  '/pass': typeof PassRoute
   '/stickers': typeof StickersRoute
   '/upgrade': typeof UpgradeRoute
   '/wheel': typeof WheelRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/earn' | '/stickers' | '/upgrade' | '/wheel'
+  fullPaths: '/' | '/earn' | '/pass' | '/stickers' | '/upgrade' | '/wheel'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/earn' | '/stickers' | '/upgrade' | '/wheel'
-  id: '__root__' | '/' | '/earn' | '/stickers' | '/upgrade' | '/wheel'
+  to: '/' | '/earn' | '/pass' | '/stickers' | '/upgrade' | '/wheel'
+  id: '__root__' | '/' | '/earn' | '/pass' | '/stickers' | '/upgrade' | '/wheel'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   EarnRoute: typeof EarnRoute
+  PassRoute: typeof PassRoute
   StickersRoute: typeof StickersRoute
   UpgradeRoute: typeof UpgradeRoute
   WheelRoute: typeof WheelRoute
@@ -93,6 +103,13 @@ declare module '@tanstack/react-router' {
       path: '/earn'
       fullPath: '/earn'
       preLoaderRoute: typeof EarnRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pass': {
+      id: '/pass'
+      path: '/pass'
+      fullPath: '/pass'
+      preLoaderRoute: typeof PassRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/stickers': {
@@ -122,6 +139,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   EarnRoute: EarnRoute,
+  PassRoute: PassRoute,
   StickersRoute: StickersRoute,
   UpgradeRoute: UpgradeRoute,
   WheelRoute: WheelRoute,

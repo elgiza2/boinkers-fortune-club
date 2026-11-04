@@ -5,7 +5,7 @@ export const SPIN_REGEN_MS = 60_000; // 1 spin / minute
 export const PART_MAX = 3;
 export type Part = "head" | "body" | "gear";
 
-export const SYMBOLS = ["coin", "bolt", "gem", "chest"] as const;
+export const SYMBOLS = ["coin", "bolt", "gem", "chest", "token"] as const;
 export type Sym = (typeof SYMBOLS)[number];
 
 export interface GameState {
@@ -21,6 +21,12 @@ export interface GameState {
   tasksDone: string[];
   claimedMilestones: number[];
   sound: boolean;
+  passXp: number;
+  passLevel: number;
+  premium: boolean;
+  eventId: number;
+  evTokens: number;
+  evTier: number;
 }
 
 const initial = (): GameState => ({
@@ -28,6 +34,8 @@ const initial = (): GameState => ({
   parts: { head: 0, body: 0, gear: 0 },
   lastSpinRegen: Date.now(), lastSoloClaim: Date.now(),
   tasksDone: [], claimedMilestones: [], sound: true,
+  passXp: 0, passLevel: 1, premium: false,
+  eventId: -1, evTokens: 0, evTier: 0,
 });
 
 /** Solo per hour grows with character upgrades and level. */
@@ -45,7 +53,7 @@ export function slotPayout(r: Sym[], bet: number) {
   const out = { coins: 0, spins: 0, tickets: 0, tokens: 1 * bet };
   if (a === b && b === c) {
     const map: Record<Sym, Partial<typeof out>> = {
-      coin: { coins: 5000 }, bolt: { spins: 10 }, gem: { coins: 20000, tickets: 1 }, chest: { coins: 10000, spins: 5 },
+      coin: { coins: 5000 }, bolt: { spins: 10 }, gem: { coins: 20000, tickets: 1 }, chest: { coins: 10000, spins: 5 }, token: { coins: 15000 },
     };
     const m = map[a];
     out.coins += (m.coins ?? 0) * bet; out.spins += (m.spins ?? 0) * bet; out.tickets += m.tickets ?? 0;
@@ -54,6 +62,44 @@ export function slotPayout(r: Sym[], bet: number) {
     out.coins += 300 * bet;
   }
   return out;
+}
+
+/** Spin pass: XP needed to finish a level grows with level. */
+export function passNeed(level: number) { return Math.round(100 * Math.pow(1.35, level - 1)); }
+/** Gift for reaching a new pass level; premium players get double plus a ticket. */
+export function passGift(level: number, premium: boolean) {
+  const base = { coins: 1000 * level, spins: 5 + Math.floor(level / 2), tickets: 0 };
+  return premium ? { coins: base.coins * 2, spins: base.spins * 2, tickets: 1 } : base;
+}
+/** Add XP (1 per spin used), rolling over levels. Returns new xp/level and total gifts earned. */
+export function addPassXp(xp: number, level: number, add: number, premium: boolean) {
+  let x = xp + add, l = level; const gift = { coins: 0, spins: 0, tickets: 0 };
+  while (x >= passNeed(l)) { x -= passNeed(l); l += 1; const g = passGift(l, premium); gift.coins += g.coins; gift.spins += g.spins; gift.tickets += g.tickets; }
+  return { xp: x, level: l, gift, levelsUp: l - level };
+}
+
+/** 48h rotating events, each with its own reel token. */
+export const EVENT_MS = 48 * 3600_000;
+export const EVENTS = [
+  { key: "pumpkin", name: "Pumpkin Party" },
+  { key: "frog", name: "Frog Frenzy" },
+  { key: "star", name: "Star Rush" },
+] as const;
+export function eventIndex(now: number) { return Math.floor(now / EVENT_MS); }
+export function currentEvent(now: number) {
+  const id = eventIndex(now);
+  return { id, ...EVENTS[id % EVENTS.length]!, endsIn: EVENT_MS - (now % EVENT_MS) };
+}
+/** Tokens needed for the next reward tier; grows forever. */
+export function evNeed(tier: number) { return Math.round(5 * Math.pow(1.4, tier)); }
+/** Coin reward for finishing a tier; bigger every tier. */
+export function evReward(tier: number) { return Math.round(2000 * Math.pow(1.5, tier)); }
+/** Coins paid instantly per event token landed. */
+export const COINS_PER_TOKEN = 250;
+export function addEventTokens(st: { eventId: number; evTokens: number; evTier: number }, id: number, add: number) {
+  let t = (st.eventId === id ? st.evTokens : 0) + add, tier = st.eventId === id ? st.evTier : 0, coins = add * COINS_PER_TOKEN;
+  while (t >= evNeed(tier)) { t -= evNeed(tier); coins += evReward(tier); tier += 1; }
+  return { eventId: id, evTokens: t, evTier: tier, coins };
 }
 
 export const MILESTONES = [
@@ -80,6 +126,8 @@ interface Ctx {
   completeTask: (id: string, r: Reward) => void;
   claimMilestone: (i: number) => void;
   toggleSound: () => void;
+  gainPass: (spinsUsed: number) => number;
+  gainEvent: (tokens: number) => number;
 }
 const GameCtx = createContext<Ctx | null>(null);
 const KEY = "solo-slots-v1";
@@ -126,6 +174,16 @@ export function GameProvider({ children }: { children: ReactNode }) {
     });
     return ok && (r.coins ?? 0) <= s.coins && (r.spins ?? 0) <= s.spins && (r.tickets ?? 0) <= s.tickets;
   }, [s]);
+  const gainPass = useCallback((n: number) => {
+    const r = addPassXp(s.passXp, s.passLevel, n, s.premium);
+    setS((p) => ({ ...p, passXp: r.xp, passLevel: r.level, coins: p.coins + r.gift.coins, spins: p.spins + r.gift.spins, tickets: p.tickets + r.gift.tickets }));
+    return r.levelsUp ? r.level : 0;
+  }, [s.passXp, s.passLevel, s.premium]);
+  const gainEvent = useCallback((n: number) => {
+    const r = addEventTokens(s, eventIndex(Date.now()), n);
+    setS((p) => ({ ...p, eventId: r.eventId, evTokens: r.evTokens, evTier: r.evTier, coins: p.coins + r.coins }));
+    return r.coins;
+  }, [s]);
   const claimSolo = useCallback(() => {
     const amt = pendingSolo;
     setS((p) => ({ ...p, solo: p.solo + amt, lastSoloClaim: Date.now() }));
@@ -162,7 +220,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
   }, []);
   const toggleSound = useCallback(() => setS((p) => ({ ...p, sound: !p.sound })), []);
 
-  return <GameCtx.Provider value={{ s, ready, pendingSolo, nextSpinIn, grant, spend, claimSolo, upgrade, completeTask, claimMilestone, toggleSound }}>{children}</GameCtx.Provider>;
+  return <GameCtx.Provider value={{ s, ready, pendingSolo, nextSpinIn, grant, spend, claimSolo, upgrade, completeTask, claimMilestone, toggleSound, gainPass, gainEvent }}>{children}</GameCtx.Provider>;
 }
 
 export function useGame() {
