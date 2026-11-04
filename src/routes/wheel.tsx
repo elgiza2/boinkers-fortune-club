@@ -7,6 +7,7 @@ import { ART } from "@/lib/art";
 import { Button } from "@/components/ui/button";
 import { Star, Ticket } from "lucide-react";
 import mascot from "@/assets/merge-mascot-3.png";
+import { WHEEL_PRIZES, wheelLandingRotation } from "@/lib/wheel";
 
 export const Route = createFileRoute("/wheel")({
   head: () => ({
@@ -22,12 +23,7 @@ export const Route = createFileRoute("/wheel")({
   component: WheelPage,
 });
 
-const PRIZES = [
-  { label: "50K", img: ART.coin, r: { coins: 50000 } }, { label: "25", img: ART.bolt, r: { spins: 25 } },
-  { label: "5K", img: ART.coin, r: { coins: 5000 } }, { label: "2", img: ART.gem, r: { tickets: 2 } },
-  { label: "500K", img: ART.chest, r: { coins: 500000 } }, { label: "10", img: ART.bolt, r: { spins: 10 } },
-  { label: "10K", img: ART.gem, r: { solo: 10000 } }, { label: "100", img: ART.bolt, r: { spins: 100 } },
-];
+const PRIZES = WHEEL_PRIZES;
 function WheelPage() {
   const { s, spend, grant } = useGame();
   const [rot, setRot] = useState(0);
@@ -39,8 +35,8 @@ function WheelPage() {
     if (!spend({ tickets: 1 })) { toast.error("Need a roulette ticket"); return; }
     setBusy(true); setWinner(null); haptic();
     const idx = Math.floor(Math.random() * PRIZES.length);
-    setRot(rot + 360 * 6 + (360 - idx * seg - seg / 2 - (rot % 360)));
-    setTimeout(() => { const p = PRIZES[idx]; if (p) { grant(p.r); beep(s.sound, 1000, 0.3); setWinner(p.label); toast.success(`You won ${p.label}!`); } setBusy(false); }, 4200);
+    setRot(wheelLandingRotation(rot, idx));
+    setTimeout(() => { const p = PRIZES[idx]; if (p) { grant(p.reward); beep(s.sound, 1000, 0.3); setWinner(p.label); toast.success(`You won ${p.label}!`); } setBusy(false); }, 4200);
   };
   return (
     <Screen bare scroll={false}>
@@ -51,13 +47,13 @@ function WheelPage() {
           <div className="fortune-wheel" aria-label="Prize wheel">
           <Star className="fortune-pointer" strokeWidth={1.8} />
           <div className="fortune-rim">
-            {Array.from({ length: 16 }, (_, i) => <span key={i} className={`fortune-bulb ${i % 2 ? "fortune-bulb-pink" : ""}`} style={{ transform: `rotate(${i * 22.5}deg)` }}><i /></span>)}
+            {Array.from({ length: 12 }, (_, i) => <span key={i} className={`fortune-bulb ${i % 2 ? "fortune-bulb-pink" : ""}`} style={{ transform: `rotate(${i * 30 + 15}deg)` }}><i /></span>)}
           </div>
           <div className="fortune-disc" style={{ transform: `rotate(${rot}deg)` }}>
             {PRIZES.map((p, i) => (
-              <div key={i} className="fortune-prize" style={{ transform: `translateX(-50%) rotate(${i * seg + seg / 2}deg)` }}>
+              <div key={i} className="fortune-prize" style={{ transform: `translateX(-50%) rotate(${i * seg}deg)` }}>
                 <div className="fortune-prize-content">
-                  <img src={p.img} alt="" />
+                  {p.kind === "ticket" ? <Ticket className="fortune-ticket-prize" /> : <img src={ART[p.kind]} alt="" />}
                   <span>{p.label}</span>
                 </div>
               </div>

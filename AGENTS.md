@@ -13,3 +13,4 @@
 - Bank elapsed SOLO at the old board rate before board changes; retain fractional production to avoid losing earnings.
 - Game state uses the existing device-local provider until account persistence is requested; connected Cloud resources remain unused.
 - Render drag overlays in a body portal, outside frosted-glass ancestors, so backdrop filters cannot offset drag collision coordinates.
+- Wheel rewards and landing angles share a pure tested module so displayed segments match awarded prizes.
