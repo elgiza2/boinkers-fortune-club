@@ -71,7 +71,7 @@ function Upgrade() {
   return <Screen bare scroll={false}>
     <div className="merge-page">
       <header className="merge-heading">
-        <div className="merge-title"><h1>Merge Island</h1><span className="merge-production"><Gem size={13} />{fmt(soloRate(s))}<small> SOLO / hr</small></span></div>
+        <div className="merge-title"><span className="merge-production"><Gem size={13} />{fmt(soloRate(s))}<small> SOLO / hr</small></span></div>
         <Button variant="ghost" size="icon" className="merge-book" onClick={() => setCollection(true)} aria-label="Creature collection" title="Creature collection"><BookOpen /></Button>
       </header>
       <section className="merge-world" aria-label="Merge island board">

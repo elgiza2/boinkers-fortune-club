@@ -4,6 +4,9 @@ import { toast } from "sonner";
 import { Screen } from "@/components/game/Shell";
 import { useGame, beep, haptic } from "@/lib/game";
 import { ART } from "@/lib/art";
+import { Button } from "@/components/ui/button";
+import { Star, Ticket } from "lucide-react";
+import mascot from "@/assets/merge-mascot-3.png";
 
 export const Route = createFileRoute("/wheel")({
   head: () => ({
@@ -25,42 +28,49 @@ const PRIZES = [
   { label: "500K", img: ART.chest, r: { coins: 500000 } }, { label: "10", img: ART.bolt, r: { spins: 10 } },
   { label: "10K", img: ART.gem, r: { solo: 10000 } }, { label: "100", img: ART.bolt, r: { spins: 100 } },
 ];
-const SEG = ["var(--berry)", "var(--sun)", "var(--sky)", "var(--lime)"];
-
 function WheelPage() {
   const { s, spend, grant } = useGame();
   const [rot, setRot] = useState(0);
   const [busy, setBusy] = useState(false);
+  const [winner, setWinner] = useState<string | null>(null);
   const seg = 360 / PRIZES.length;
   const go = () => {
     if (busy) return;
     if (!spend({ tickets: 1 })) { toast.error("Need a roulette ticket"); return; }
-    setBusy(true); haptic();
+    setBusy(true); setWinner(null); haptic();
     const idx = Math.floor(Math.random() * PRIZES.length);
     setRot(rot + 360 * 6 + (360 - idx * seg - seg / 2 - (rot % 360)));
-    setTimeout(() => { const p = PRIZES[idx]!; grant(p.r); beep(s.sound, 1000, 0.3); toast.success(`You won ${p.label}!`); setBusy(false); }, 4200);
+    setTimeout(() => { const p = PRIZES[idx]; if (p) { grant(p.r); beep(s.sound, 1000, 0.3); setWinner(p.label); toast.success(`You won ${p.label}!`); } setBusy(false); }, 4200);
   };
-  const grad = PRIZES.map((_, i) => `${SEG[i % 4]} ${i * seg}deg ${(i + 1) * seg}deg`).join(",");
   return (
-    <Screen scroll={false}>
-      <div className="flex h-full flex-col items-center justify-center gap-5 pb-14">
-        <h1 className="font-display text-3xl text-sun text-outline">WHEEL OF FORTUNE</h1>
-        <div className="relative aspect-square w-[78%] max-w-[300px]">
-          <div className="absolute left-1/2 -top-3 z-10 h-0 w-0 -translate-x-1/2 border-x-[14px] border-t-[24px] border-x-transparent border-t-sun drop-shadow-[0_3px_0_var(--ink)]" />
-          <div className="h-full w-full rounded-full border-[6px] border-ink shadow-chunk"
-            style={{ background: `conic-gradient(${grad})`, transform: `rotate(${rot}deg)`, transition: "transform 4s cubic-bezier(.17,.67,.2,1)" }}>
+    <Screen bare scroll={false}>
+      <div className="fortune-page">
+        <h1 className="fortune-title">WHEEL OF FORTUNE</h1>
+        <div className="fortune-stage">
+          <div className="fortune-stand"><span>SOLO</span></div>
+          <div className="fortune-wheel" aria-label="Prize wheel">
+          <Star className="fortune-pointer" strokeWidth={1.8} />
+          <div className="fortune-rim">
+            {Array.from({ length: 16 }, (_, i) => <span key={i} className={`fortune-bulb ${i % 2 ? "fortune-bulb-pink" : ""}`} style={{ transform: `rotate(${i * 22.5}deg)` }}><i /></span>)}
+          </div>
+          <div className="fortune-disc" style={{ transform: `rotate(${rot}deg)` }}>
             {PRIZES.map((p, i) => (
-              <div key={i} className="absolute left-1/2 top-0 h-1/2 w-12 -translate-x-1/2 origin-bottom" style={{ transform: `translateX(-50%) rotate(${i * seg + seg / 2}deg)` }}>
-                <div className="flex flex-col items-center pt-3">
-                  <img src={p.img} alt="" className="h-8 w-8 object-contain" />
-                  <span className="font-display text-xs text-cream text-outline">{p.label}</span>
+              <div key={i} className="fortune-prize" style={{ transform: `translateX(-50%) rotate(${i * seg + seg / 2}deg)` }}>
+                <div className="fortune-prize-content">
+                  <img src={p.img} alt="" />
+                  <span>{p.label}</span>
                 </div>
               </div>
             ))}
           </div>
-          <div className="absolute left-1/2 top-1/2 h-12 w-12 -translate-x-1/2 -translate-y-1/2 rounded-full border-4 border-ink bg-sun" />
+          <div className="fortune-hub"><img src={mascot} alt="Golden mascot" /></div>
+          </div>
         </div>
-        <button onClick={go} disabled={busy} className="chunk-btn bg-lime px-8 py-3 font-display text-2xl">SPIN · {s.tickets} TICKETS</button>
+        <div className="fortune-controls">
+          <span className="fortune-result" role="status">{winner ? `+${winner}` : ""}</span>
+          <Button onClick={go} disabled={busy} className="fortune-spin" aria-label="Spin prize wheel">{busy ? "SPINNING" : "SPIN"}</Button>
+          <span className="fortune-tickets"><Ticket size={16} />{s.tickets} {s.tickets === 1 ? "ticket" : "tickets"}</span>
+        </div>
       </div>
     </Screen>
   );
