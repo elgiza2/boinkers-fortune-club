@@ -39,17 +39,14 @@ function Pill({ icon, value }: { icon: string; value: string }) {
 }
 
 type To = "/" | "/upgrade" | "/earn" | "/nft" | "/wheel";
-function NavItem({ icon, label, to, dot, divider }: { icon: string; label: string; to: To; dot?: boolean; divider?: "l" | "r" }) {
+function NavItem({ icon, label, to, divider }: { icon: string; label: string; to: To; divider?: "l" | "r" }) {
   return (
     <Link
       to={to}
       activeOptions={{ exact: true }}
       className={`group flex flex-col items-center justify-center gap-1 border-ink/60 ${divider === "r" ? "border-r-2" : divider === "l" ? "border-l-2" : ""}`}
     >
-      <span className="relative">
-        <img src={icon} alt="" className="h-10 w-10 object-contain transition-transform group-active:scale-90 group-data-[status=active]:scale-110" />
-        {dot && <span className="absolute -right-0.5 -top-0.5 h-3.5 w-3.5 rounded-full border-2 border-ink bg-berry" />}
-      </span>
+      <img src={icon} alt="" className="h-10 w-10 object-contain transition-transform group-active:scale-90 group-data-[status=active]:scale-110" />
       <span className="font-display text-[11px] leading-none text-muted-foreground group-data-[status=active]:text-sun">{label}</span>
     </Link>
   );
@@ -62,7 +59,7 @@ export function BottomNav({ center }: { center?: ReactNode }) {
   return (
     <nav className="relative z-30 shrink-0 pb-[env(safe-area-inset-bottom)]">
       <div className="relative grid h-[78px] grid-cols-[1fr_1fr_1.9fr_1fr_1fr] border-t-[3px] border-ink bg-night">
-        <NavItem icon={ART.rocket} label="UPGRADE" to="/upgrade" dot divider="r" />
+        <NavItem icon={ART.rocket} label="UPGRADE" to="/upgrade" divider="r" />
         <NavItem icon={ART.bag} label="EARN" to="/earn" divider="r" />
         <div className="relative">
           <div className="absolute left-1/2 top-[-58px] h-[112px] w-[112px] -translate-x-1/2">
@@ -81,7 +78,7 @@ export function BottomNav({ center }: { center?: ReactNode }) {
           </div>
         </div>
         <NavItem icon={nftIcon} label="NFT" to="/nft" divider="l" />
-        <NavItem icon={ART.wheel} label="WHEEL" to="/wheel" dot={s.tickets > 0} divider="l" />
+        <NavItem icon={ART.wheel} label="WHEEL" to="/wheel" divider="l" />
       </div>
     </nav>
   );
