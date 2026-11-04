@@ -5,7 +5,7 @@ export const SPIN_REGEN_MS = 60_000; // 1 spin / minute
 export const PART_MAX = 3;
 export type Part = "head" | "body" | "gear";
 
-export const SYMBOLS = ["🪙", "⚡", "💎", "🎁", "🍒", "🎟️"] as const;
+export const SYMBOLS = ["coin", "bolt", "gem", "chest"] as const;
 export type Sym = (typeof SYMBOLS)[number];
 
 export interface GameState {
@@ -45,8 +45,7 @@ export function slotPayout(r: Sym[], bet: number) {
   const out = { coins: 0, spins: 0, tickets: 0, tokens: 1 * bet };
   if (a === b && b === c) {
     const map: Record<Sym, Partial<typeof out>> = {
-      "🪙": { coins: 5000 }, "⚡": { spins: 10 }, "💎": { coins: 20000 },
-      "🎁": { coins: 3000, spins: 5 }, "🍒": { coins: 2000 }, "🎟️": { tickets: 1 },
+      coin: { coins: 5000 }, bolt: { spins: 10 }, gem: { coins: 20000, tickets: 1 }, chest: { coins: 10000, spins: 5 },
     };
     const m = map[a];
     out.coins += (m.coins ?? 0) * bet; out.spins += (m.spins ?? 0) * bet; out.tickets += m.tickets ?? 0;
