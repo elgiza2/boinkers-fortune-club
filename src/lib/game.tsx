@@ -1,4 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from "react";
+import { bankProduction, buyCharacter, mergeRate, moveCharacter, starterBoard, type Board } from "./merge";
 
 export const MAX_SPINS = 50;
 export const SPIN_REGEN_MS = 60_000; // 1 spin / minute
@@ -27,6 +28,9 @@ export interface GameState {
   eventId: number;
   evTokens: number;
   evTier: number;
+  mergeBoard: Board;
+  mergeBest: number;
+  soloBank: number;
 }
 
 const initial = (): GameState => ({
@@ -36,10 +40,12 @@ const initial = (): GameState => ({
   tasksDone: [], claimedMilestones: [], sound: true,
   passXp: 0, passLevel: 1, premium: false,
   eventId: -1, evTokens: 0, evTier: 0,
+  mergeBoard: starterBoard(), mergeBest: 1, soloBank: 0,
 });
 
 /** Solo per hour grows with character upgrades and level. */
-export function soloRate(s: Pick<GameState, "parts" | "level">) {
+export function soloRate(s: Pick<GameState, "parts" | "level"> & Partial<Pick<GameState, "mergeBoard">>) {
+  if (s.mergeBoard) return mergeRate(s.mergeBoard);
   const total = s.parts.head + s.parts.body + s.parts.gear;
   return Math.round(100 * (1 + total * 0.5) * (1 + (s.level - 1) * 0.25));
 }
@@ -128,6 +134,8 @@ interface Ctx {
   toggleSound: () => void;
   gainPass: (spinsUsed: number) => number;
   gainEvent: (tokens: number) => number;
+  buyMerge: () => void;
+  moveMerge: (from: number, to: number) => void;
 }
 const GameCtx = createContext<Ctx | null>(null);
 const KEY = "solo-slots-v1";
@@ -149,6 +157,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
   }, []);
   useEffect(() => { if (loaded.current) localStorage.setItem(KEY, JSON.stringify(s)); }, [s]);
 
+
   // spin regen
   useEffect(() => {
     setS((p) => {
@@ -159,7 +168,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
     });
   }, [now]);
 
-  const pendingSolo = Math.floor(((now - s.lastSoloClaim) / 3_600_000) * soloRate(s));
+  const pendingSolo = Math.floor(bankProduction(s.soloBank, s.lastSoloClaim, now, soloRate(s)));
   const nextSpinIn = s.spins >= MAX_SPINS ? 0 : Math.max(0, SPIN_REGEN_MS - (now - s.lastSpinRegen));
 
   const grant = useCallback((r: Reward) => setS((p) => ({
@@ -186,9 +195,24 @@ export function GameProvider({ children }: { children: ReactNode }) {
   }, [s]);
   const claimSolo = useCallback(() => {
     const amt = pendingSolo;
-    setS((p) => ({ ...p, solo: p.solo + amt, lastSoloClaim: Date.now() }));
+    setS((p) => {
+      const at = Date.now(), total = bankProduction(p.soloBank, p.lastSoloClaim, at, soloRate(p));
+      return { ...p, solo: p.solo + Math.floor(total), soloBank: total % 1, lastSoloClaim: at };
+    });
     return amt;
   }, [pendingSolo]);
+  const buyMerge = useCallback(() => setS(p => {
+    const result = buyCharacter(p.mergeBoard, p.coins);
+    if (!result) return p;
+    const at = Date.now();
+    return { ...p, coins: result.coins, mergeBoard: result.board, soloBank: bankProduction(p.soloBank, p.lastSoloClaim, at, soloRate(p)), lastSoloClaim: at };
+  }), []);
+  const moveMerge = useCallback((from: number, to: number) => setS(p => {
+    const result = moveCharacter(p.mergeBoard, from, to);
+    if (!result) return p;
+    const at = Date.now();
+    return { ...p, mergeBoard: result.board, mergeBest: Math.max(p.mergeBest, result.level), soloBank: bankProduction(p.soloBank, p.lastSoloClaim, at, soloRate(p)), lastSoloClaim: at };
+  }), []);
   const upgrade = useCallback((part: Part) => {
     const tier = s.parts[part];
     const cost = upgradeCost(s.level, tier);
@@ -220,7 +244,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
   }, []);
   const toggleSound = useCallback(() => setS((p) => ({ ...p, sound: !p.sound })), []);
 
-  return <GameCtx.Provider value={{ s, ready, pendingSolo, nextSpinIn, grant, spend, claimSolo, upgrade, completeTask, claimMilestone, toggleSound, gainPass, gainEvent }}>{children}</GameCtx.Provider>;
+  return <GameCtx.Provider value={{ s, ready, pendingSolo, nextSpinIn, grant, spend, claimSolo, upgrade, completeTask, claimMilestone, toggleSound, gainPass, gainEvent, buyMerge, moveMerge }}>{children}</GameCtx.Provider>;
 }
 
 export function useGame() {

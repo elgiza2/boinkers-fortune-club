@@ -1,71 +1,104 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useRef, useState } from "react";
+import { DndContext, DragOverlay, PointerSensor, KeyboardSensor, useSensor, useSensors, useDraggable, useDroppable, closestCenter, type DragEndEvent } from "@dnd-kit/core";
+import { BookOpen, ChevronRight, Gem, LockKeyhole, Plus } from "lucide-react";
 import { toast } from "sonner";
-import hero from "@/assets/hero-character.png";
+import island from "@/assets/merge-island.jpg";
 import { Screen } from "@/components/game/Shell";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { ART } from "@/lib/art";
-import { PART_MAX, type Part, fmt, soloRate, upgradeCost, useGame, beep } from "@/lib/game";
+import { fmt, soloRate, useGame, beep, haptic } from "@/lib/game";
+import { CHARACTER_COST, CHARACTERS, MAX_MERGE_LEVEL, moveCharacter } from "@/lib/merge";
+import { MERGE_ART } from "@/lib/merge-art";
 
 export const Route = createFileRoute("/upgrade")({
-  head: () => ({
-    meta: [
-      { title: "Upgrade Your Hero — Solo Slots" },
-      { name: "description", content: "Upgrade head, body and gear with coins to boost your hourly Solo mining." },
-      { property: "og:title", content: "Upgrade Your Hero — Solo Slots" },
-      { property: "og:description", content: "Boost your hourly Solo mining by upgrading your hero." },
-    ],
-  }),
+  head: () => ({ meta: [
+    { title: "Merge Island — Solo Slots" },
+    { name: "description", content: "Grow your island, merge evolving creatures and collect SOLO." },
+    { property: "og:title", content: "Merge Island — Solo Slots" },
+    { property: "og:description", content: "Discover woodland and coral creatures on your merge island." },
+    { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" },
+  ] }),
   component: Upgrade,
 });
 
-const PARTS: { id: Part; icon: string; label: string }[] = [
-  { id: "head", icon: ART.gem, label: "HEAD" }, { id: "body", icon: ART.chest, label: "BODY" }, { id: "gear", icon: ART.rocket, label: "GEAR" },
-];
+function Creature({ level, silhouette = false }: { level: number; silhouette?: boolean }) {
+  return <img src={MERGE_ART[level - 1]} width={128} height={128} draggable={false} alt={silhouette ? "Undiscovered creature" : CHARACTERS[level - 1]?.name} className={`merge-creature merge-motion-${level} ${silhouette ? "merge-silhouette" : ""}`} />;
+}
+
+function Cell({ index, level, selected, match, onSelect, fresh }: { index: number; level: number | null; selected: boolean; match: boolean; onSelect: () => void; fresh: boolean }) {
+  const { setNodeRef: dropRef, isOver } = useDroppable({ id: index });
+  const { attributes, listeners, setNodeRef: dragRef, isDragging } = useDraggable({ id: index, disabled: !level });
+  return <div ref={dropRef} className={`merge-cell ${isOver || selected ? "merge-cell-active" : ""} ${match ? "merge-cell-match" : ""}`}>
+    <Button ref={dragRef} variant="ghost" {...attributes} {...listeners} onClick={onSelect} aria-label={level ? `Slot ${index + 1}, ${CHARACTERS[level - 1]?.name}, level ${level}` : `Empty slot ${index + 1}`} className={`merge-cell-button ${isDragging ? "opacity-20" : ""} ${fresh ? "merge-evolve" : ""}`}>
+      {level ? <><Creature level={level} /><span className="merge-level">{level}</span></> : <Plus className="merge-empty" strokeWidth={1.5} />}
+    </Button>
+  </div>;
+}
 
 function Upgrade() {
-  const { s, upgrade, pendingSolo, claimSolo } = useGame();
-  const done = s.parts.head + s.parts.body + s.parts.gear;
-  return (
-    <Screen>
-      <div className="relative overflow-hidden rounded-[2rem] border-4 border-ink bg-gradient-to-b from-sky to-grape p-4 shadow-chunk">
-        <div className="absolute inset-x-0 bottom-0 h-12 rounded-t-[50%] bg-lime/70 border-t-4 border-ink" />
-        <img src={hero} alt="Your hero" width={1024} height={1024} className="relative mx-auto h-56 w-56 animate-bob object-contain" />
-        <div className="relative mt-1 text-center font-display text-2xl text-cream text-outline">LEVEL {s.level}</div>
-        <div className="relative mt-2 h-6 overflow-hidden rounded-full border-4 border-ink bg-ink/60">
-          <div className="h-full bg-sun transition-all" style={{ width: `${(done / (PART_MAX * 3)) * 100}%` }} />
-          <span className="absolute inset-0 grid place-items-center font-display text-xs text-outline">{done}/{PART_MAX * 3} UPGRADES</span>
-        </div>
-      </div>
-
-      <div className="mt-4 grid grid-cols-3 gap-2">
-        {PARTS.map((p) => {
-          const tier = s.parts[p.id], max = tier >= PART_MAX, cost = upgradeCost(s.level, tier);
-          return (
-            <div key={p.id} className="rounded-2xl border-4 border-ink bg-card p-2 text-center shadow-chunk">
-              <img src={p.icon} alt="" className="mx-auto h-10 w-10 object-contain" />
-              <div className="font-display text-sm">{p.label}</div>
-              <div className="my-1 flex justify-center gap-1">
-                {Array.from({ length: PART_MAX }, (_, i) => <span key={i} className={`h-2.5 w-4 rounded-sm border-2 border-ink ${i < tier ? "bg-lime" : "bg-ink/50"}`} />)}
-              </div>
-              <button disabled={max || s.coins < cost}
-                onClick={() => { if (upgrade(p.id)) { beep(s.sound, 800, 0.15); toast.success(`${p.label} upgraded!`); } }}
-                className="chunk-btn w-full bg-lime py-1.5 text-xs">{max ? "MAX" : `${fmt(cost)} COINS`}</button>
-            </div>
-          );
-        })}
-      </div>
-
-      <div className="mt-4 rounded-2xl border-4 border-ink bg-grape p-3 shadow-chunk">
-        <div className="flex items-center justify-between">
-          <div>
-            <div className="font-display text-lg text-sun text-outline">SOLO MINING</div>
-            <div className="text-sm font-semibold">{fmt(soloRate(s))} Solo / hour</div>
+  const { s, ready, buyMerge, moveMerge, pendingSolo, claimSolo } = useGame();
+  const [active, setActive] = useState<number | null>(null);
+  const [selected, setSelected] = useState<number | null>(null);
+  const [fresh, setFresh] = useState<number | null>(null);
+  const [collection, setCollection] = useState(false);
+  const dragged = useRef(false);
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }), useSensor(KeyboardSensor));
+  const best = s.mergeBest;
+  const next = Math.min(MAX_MERGE_LEVEL, best + 1);
+  const nextCreature = CHARACTERS[next - 1];
+  const full = !s.mergeBoard.includes(null);
+  function move(from: number, to: number) {
+    const result = moveCharacter(s.mergeBoard, from, to);
+    if (!result) { toast("These creatures cannot merge"); setSelected(null); return; }
+    moveMerge(from, to); setSelected(null);
+    if (result.merged) {
+      setFresh(to); beep(s.sound, 900, 0.18); haptic();
+      if (result.level > best) toast.success(`${CHARACTERS[result.level - 1]?.name} discovered`);
+    }
+  }
+  function end(event: DragEndEvent) {
+    setActive(null);
+    if (event.over) move(Number(event.active.id), Number(event.over.id));
+    setTimeout(() => { dragged.current = false; }, 0);
+  }
+  function select(index: number) {
+    if (dragged.current) return;
+    if (selected !== null && selected !== index) move(selected, index);
+    else setSelected(s.mergeBoard[index] ? (selected === index ? null : index) : null);
+  }
+  return <Screen bare scroll={false}>
+    <div className="merge-page">
+      <header className="merge-heading">
+        <div><p className="merge-eyebrow">YOUR LITTLE WORLD</p><h1>Merge Island</h1></div>
+        <Button variant="ghost" size="icon" className="merge-book" onClick={() => setCollection(true)} aria-label="Creature collection" title="Creature collection"><BookOpen /></Button>
+      </header>
+      <div className="merge-production"><span><Gem size={16} /> SOLO production</span><strong>{fmt(soloRate(s))}<small> / hr</small></strong></div>
+      <section className="merge-world" aria-label="Merge island board">
+        <img src={island} width={768} height={1024} alt="A lush green island surrounded by turquoise water" className="merge-land" />
+        <span className="merge-family">{best < 4 ? "Woodland family" : "Coral family"}</span>
+        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={e => { dragged.current = true; setActive(Number(e.active.id)); setSelected(null); }} onDragEnd={end} onDragCancel={() => { setActive(null); dragged.current = false; }}>
+          <div className="merge-grid">
+            {s.mergeBoard.map((level, index) => <Cell key={index} index={index} level={level} selected={selected === index} match={(active !== null || selected !== null) && level !== null && level < 6 && level === s.mergeBoard[active ?? selected ?? -1] && index !== (active ?? selected)} onSelect={() => select(index)} fresh={fresh === index} />)}
           </div>
-          <div className="text-right font-display text-3xl tabular-nums text-cream text-outline">{fmt(pendingSolo)}</div>
-        </div>
-        <button disabled={pendingSolo < 1} onClick={() => { const a = claimSolo(); toast.success(`+${fmt(a)} Solo claimed`); beep(s.sound, 1000, 0.2); }}
-          className="chunk-btn mt-3 w-full bg-sun py-3 text-2xl">CLAIM</button>
-        <p className="mt-2 text-center text-xs text-muted-foreground">Finish all 9 upgrades to level up and boost your rate.</p>
+          <DragOverlay>{active !== null && s.mergeBoard[active] ? <div className="merge-drag"><Creature level={s.mergeBoard[active] ?? 1} /></div> : null}</DragOverlay>
+        </DndContext>
+        <div className="merge-capacity">{s.mergeBoard.filter(Boolean).length} / 12</div>
+      </section>
+      <Button variant="ghost" className="merge-next" onClick={() => setCollection(true)}>
+        <div className="merge-preview"><Creature level={next} silhouette={best < 6} />{best < 6 && <LockKeyhole size={12} />}</div>
+        <div><span>{best === 6 ? "COLLECTION COMPLETE" : next === 4 ? "NEXT FAMILY · CORAL" : "NEXT DISCOVERY"}</span><strong>{nextCreature?.name}</strong></div>
+        <span className="merge-next-level">Lv. {next}<ChevronRight size={15} /></span>
+      </Button>
+      <div className="merge-actions">
+        <Button disabled={!ready || full || s.coins < CHARACTER_COST} className="merge-buy" onClick={() => { setFresh(s.mergeBoard.indexOf(null)); buyMerge(); beep(s.sound, 550); }} aria-label="Buy Sprout for 500 coins"><Plus size={19} /><div><strong>{full ? "Island full" : "Add Sprout"}</strong><span><img src={ART.coin} alt="Coins" width={18} height={18} />{CHARACTER_COST}</span></div></Button>
+        <Button disabled={!ready || pendingSolo < 1} className="merge-claim" onClick={() => { const amount = claimSolo(); toast.success(`+${fmt(amount)} SOLO collected`); }} aria-label="Collect SOLO"><Gem size={18} /><div><strong>{fmt(pendingSolo)} SOLO</strong><span>Collect</span></div></Button>
       </div>
-    </Screen>
-  );
+    </div>
+    <Dialog open={collection} onOpenChange={setCollection}><DialogContent className="merge-collection" aria-describedby={undefined}>
+      <DialogTitle className="font-display text-xl">Creature collection</DialogTitle>
+      <div className="merge-collection-grid">{CHARACTERS.map((creature, i) => <div key={creature.name} className="merge-collection-item"><Creature level={i + 1} silhouette={i + 1 > best} /><strong>{i + 1 <= best ? creature.name : "Undiscovered"}</strong><span>Lv. {i + 1} · {creature.family}</span><small>{i + 1 <= best ? `${fmt(creature.rate)} SOLO / hr` : <LockKeyhole size={12} />}</small></div>)}</div>
+    </DialogContent></Dialog>
+  </Screen>;
 }

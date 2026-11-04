@@ -12,6 +12,8 @@ export const Route = createFileRoute("/earn")({
       { name: "description", content: "Complete tasks, invite friends, climb the leaderboard and grab shop bundles." },
       { property: "og:title", content: "Earn & Hub — Solo Slots" },
       { property: "og:description", content: "Tasks, referrals, leaderboard and shop." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   component: Earn,
