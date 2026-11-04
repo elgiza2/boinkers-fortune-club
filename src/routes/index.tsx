@@ -1,7 +1,7 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import { Crown, Ticket } from "lucide-react";
+import { Crown, Gift, Ticket } from "lucide-react";
 import hero from "@/assets/hero-character.png";
 import { Screen } from "@/components/game/Shell";
 import { SYMBOLS, type Sym, slotPayout, useGame, fmt, beep, haptic, passNeed } from "@/lib/game";
@@ -36,6 +36,7 @@ function Home() {
   const [bet, setBet] = useState(1);
   const [win, setWin] = useState<{ coins: number; spins: number; tickets: number; k: number } | null>(null);
   const [name, setName] = useState("Player");
+  const [levelUp, setLevelUp] = useState(false);
   useEffect(() => {
     const u = (window as unknown as { Telegram?: { WebApp?: { initDataUnsafe?: { user?: { first_name?: string } } } } }).Telegram?.WebApp?.initDataUnsafe?.user;
     if (u?.first_name) setName(u.first_name);
@@ -50,6 +51,7 @@ function Home() {
     if (!spend({ spins: bet })) { toast.error("Out of spins! Wait for recharge or earn more."); setAuto(false); return; }
     haptic(); setWin(null);
     const up = gainPass(bet);
+    if (up) setTimeout(() => setLevelUp(true), 1500);
     if (up) setTimeout(() => toast.success(`Pass level ${up}! Gifts added`), 1500);
     const result: Sym[] = [rnd(), rnd(), rnd()];
     setSpinning([true, true, true]);
@@ -145,7 +147,13 @@ function Home() {
               ))}
             </div>
             {/* spin pass */}
-            <div className="mx-auto mt-3 flex w-[88%] items-center">
+            <Link to="/pass" onClick={() => setLevelUp(false)} aria-label="Open spin pass gifts" className={`relative mx-auto mt-3 flex w-[88%] items-center transition-transform active:scale-95 ${levelUp ? "animate-bob" : ""}`}>
+              {levelUp && (
+                <span className="absolute -top-5 left-1/2 z-20 flex -translate-x-1/2 items-center gap-1 whitespace-nowrap rounded-full border-2 border-ink bg-berry px-2 py-0.5 shadow-[0_2px_0_var(--ink)]">
+                  <Gift className="h-3 w-3 text-cream" strokeWidth={3} />
+                  <span className="font-display text-[10px] leading-none text-cream">TAP TO CLAIM</span>
+                </span>
+              )}
               <span className={`relative z-10 -mr-2 flex h-6 -rotate-6 items-center gap-1 rounded-md border-2 border-ink px-1.5 shadow-[0_2px_0_var(--ink)] ${s.premium ? "bg-gradient-to-b from-sun to-sun-dark" : "bg-gradient-to-b from-sky to-grape"}`}>
                 {s.premium ? <Crown className="h-3 w-3 text-ink" strokeWidth={3} /> : <Ticket className="h-3 w-3 text-cream" strokeWidth={3} />}
                 <span className={`font-display text-[10px] leading-none tracking-wider ${s.premium ? "text-ink" : "text-cream"}`}>{s.premium ? "PREMIUM" : "FREE"}</span>
@@ -155,10 +163,10 @@ function Home() {
                 <div className="absolute inset-x-1 top-0.5 h-1 rounded-full bg-cream/30" />
                 <span className="absolute inset-0 grid place-items-center font-display text-[10px] leading-none text-cream text-outline">{fmt(s.passXp)}/{fmt(passNeed(s.passLevel))}</span>
               </div>
-              <span className="relative z-10 -ml-2 grid h-8 w-8 rotate-45 place-items-center rounded-[9px] border-2 border-ink bg-gradient-to-br from-sun to-sun-dark shadow-[0_2px_0_var(--ink),inset_0_2px_0_oklch(1_0_0/.5)]">
+              <span className={`relative z-10 -ml-2 grid h-8 w-8 rotate-45 place-items-center rounded-[9px] border-2 border-ink bg-gradient-to-br from-sun to-sun-dark ${levelUp ? "ring-4 ring-sun/50" : ""} shadow-[0_2px_0_var(--ink),inset_0_2px_0_oklch(1_0_0/.5)]">
                 <span className="-rotate-45 font-display text-sm leading-none text-cream text-outline">{s.passLevel}</span>
               </span>
-            </div>
+            </Link>
           </div>
         </div>
       </div>
