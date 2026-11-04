@@ -3,7 +3,6 @@ import { useRef, useState } from "react";
 import { DndContext, DragOverlay, PointerSensor, KeyboardSensor, useSensor, useSensors, useDraggable, useDroppable, closestCenter, type DragEndEvent } from "@dnd-kit/core";
 import { BookOpen, ChevronRight, Gem, LockKeyhole, Plus } from "lucide-react";
 import { toast } from "sonner";
-import island from "@/assets/merge-island.jpg";
 import { Screen } from "@/components/game/Shell";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
@@ -71,12 +70,11 @@ function Upgrade() {
   return <Screen bare scroll={false}>
     <div className="merge-page">
       <header className="merge-heading">
-        <div><p className="merge-eyebrow">YOUR LITTLE WORLD</p><h1>Merge Island</h1></div>
+        <div className="merge-title"><div className="merge-title-creature"><Creature level={best} /></div><div><p className="merge-eyebrow">YOUR CREATURES</p><h1>Merge Island</h1></div></div>
         <Button variant="ghost" size="icon" className="merge-book" onClick={() => setCollection(true)} aria-label="Creature collection" title="Creature collection"><BookOpen /></Button>
       </header>
       <div className="merge-production"><span><Gem size={16} /> SOLO production</span><strong>{fmt(soloRate(s))}<small> / hr</small></strong></div>
       <section className="merge-world" aria-label="Merge island board">
-        <img src={island} width={768} height={1024} alt="A lush green island surrounded by turquoise water" className="merge-land" />
         <span className="merge-family">{best < 4 ? "Woodland family" : "Coral family"}</span>
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={e => { dragged.current = true; setActive(Number(e.active.id)); setSelected(null); }} onDragEnd={end} onDragCancel={() => { setActive(null); dragged.current = false; }}>
           <div className="merge-grid">
