@@ -32,8 +32,8 @@ function SymImg({ sym, className }: { sym: Sym; className: string }) {
 
 function Home() {
   const { s, spend, grant, gainPass, gainEvent } = useGame();
-  const [now, setNow] = useState(() => Date.now());
-  useEffect(() => { const t = setInterval(() => setNow(Date.now()), 1000); return () => clearInterval(t); }, []);
+  const [now, setNow] = useState(0);
+  useEffect(() => { setNow(Date.now()); const t = setInterval(() => setNow(Date.now()), 1000); return () => clearInterval(t); }, []);
   const ev = currentEvent(now);
   const evTok = s.eventId === ev.id ? s.evTokens : 0, evTier = s.eventId === ev.id ? s.evTier : 0;
   const [reels, setReels] = useState<Sym[]>(["bolt", "coin", "chest"]);
@@ -141,7 +141,7 @@ function Home() {
               <div className="min-w-0 flex-1">
                 <div className="mb-1 flex items-baseline justify-between">
                   <span className="truncate font-display text-[11px] leading-none text-cream">{ev.name.toUpperCase()}</span>
-                  <span className="font-display text-[10px] leading-none text-cream/60">{clock(ev.endsIn)}</span>
+                  <span className="font-display text-[10px] leading-none text-cream/60">{now ? clock(ev.endsIn) : ""}</span>
                 </div>
                 <div className="relative h-4 overflow-hidden rounded-full border-2 border-ink bg-ink/70">
                   <div className="h-full rounded-full bg-gradient-to-r from-berry to-sun transition-[width] duration-500" style={{ width: `${Math.max(4, (evTok / evNeed(evTier)) * 100)}%` }} />
