@@ -67,67 +67,127 @@ function Home() {
 
   const offerLeft = 15 * 60_000 - ((now - base) % (15 * 60_000));
   const nextMs = MILESTONES.find((m, i) => !s.claimedMilestones.includes(i))?.at ?? MILESTONES.at(-1)!.at;
+  const t = (h: number) => clock(h * 3600_000 - ((now - base) % (h * 3600_000)));
+  const offerFn = () => { if (spend({ coins: 20000 })) { grant({ spins: 100, tickets: 1 }); toast.success("Offer claimed!"); } else toast.error("Need 20K coins for this offer"); };
+
+  const spinBtn = (
+    <div className="relative -mt-14 w-full">
+      <button
+        onClick={() => { if (auto) setAuto(false); else spin(); }}
+        onPointerDown={() => { holdT.current = setTimeout(() => { setAuto(true); toast("Autospin ON — tap to stop"); }, 700); }}
+        onPointerUp={() => clearTimeout(holdT.current)} onPointerLeave={() => clearTimeout(holdT.current)}
+        className={`chunk-btn h-28 w-full rounded-[2rem] border-[5px] ${auto ? "bg-berry" : "bg-sun"}`}
+        style={{ boxShadow: "inset 0 -8px 0 var(--sun-dark), inset 0 4px 0 oklch(1 0 0 / .5), 0 6px 0 var(--ink)" }}
+      >
+        <span className="leading-none">
+          <span className="block text-4xl">{auto ? "STOP" : "SPIN"}</span>
+          <span className="mt-1 block text-[10px] leading-tight text-sun-dark [-webkit-text-stroke:0]">HOLD FOR<br />AUTOSPIN</span>
+        </span>
+      </button>
+      <button onClick={() => setBet((b) => (b === 1 ? 3 : b === 3 ? 5 : 1))}
+        className="chunk-btn absolute -right-5 -top-4 h-12 w-12 rotate-45 rounded-xl bg-sun">
+        <span className="-rotate-45 text-lg">x{bet}</span>
+      </button>
+    </div>
+  );
 
   return (
-    <Screen>
-      {/* events marquee */}
-      <div className="overflow-hidden rounded-2xl border-4 border-ink bg-ink/50 py-2">
-        <div className="flex w-max animate-marquee gap-3">
-          {[...EVENTS, ...EVENTS].map((e, i) => (
-            <div key={i} className="flex items-center gap-2 rounded-xl border-[3px] border-ink bg-grape px-2 py-1">
-              <span className="text-2xl">{e.icon}</span>
-              <div className="leading-tight"><div className="font-display text-xs text-cream">{e.name}</div>
-                <div className="font-display text-[11px] text-sun">{clock(e.h * 3600_000 - ((now - base) % (e.h * 3600_000)))}</div></div>
-            </div>
-          ))}
+    <Screen bare center={spinBtn} onWheel={() => setWheel(true)} onTrack={() => setTrack(true)}>
+      <div className="relative px-1 pt-3">
+        {/* side columns */}
+        <div className="absolute left-0 top-3 z-20 flex w-[72px] flex-col items-center gap-3">
+          <SideIcon icon="🏆" title="FISH" badge="#5,127" />
+          <SideIcon icon="⭐" title="SOLO STARS" />
+          <SideIcon icon="🎃" title="SCRATCH" timer={t(14)} />
+          <button onClick={() => setWheel(true)} className="flex flex-col items-center">
+            <span className="grid h-14 w-14 animate-[spin_8s_linear_infinite] place-items-center rounded-full border-4 border-ink text-2xl" style={{ background: "conic-gradient(var(--berry) 0 25%, var(--sun) 0 50%, var(--sky) 0 75%, var(--lime) 0)" }}>🎯</span>
+            <span className="font-display text-sm leading-none text-sun text-outline">X500</span>
+            <span className="font-display text-xs leading-none text-cream text-outline">WHEEL</span>
+          </button>
         </div>
-      </div>
+        <div className="absolute right-0 top-3 z-20 flex w-[72px] flex-col items-center gap-3">
+          <button onClick={() => setTrack(true)} className="flex flex-col items-center">
+            <span className="text-4xl drop-shadow-[0_3px_0_var(--ink)]">🐸</span>
+            <span className="relative -mt-1 h-4 w-16 overflow-hidden rounded-full border-[3px] border-ink bg-grape">
+              <span className="block h-full bg-sky" style={{ width: `${Math.min(100, (s.tokens / nextMs) * 100)}%` }} />
+            </span>
+            <span className="font-display text-[11px] text-cream text-outline">{s.tokens}/{nextMs}</span>
+          </button>
+          <SideIcon icon="🥼" title="SOLO LAB" timer="19D 00H" />
+          <SideIcon icon="🦚" title="TRAIL" timer={t(9)} />
+          <SideIcon icon="🏠" title="FRENZY" timer={t(30)} />
+        </div>
 
-      {/* side buttons */}
-      <div className="mt-3 flex justify-between gap-2">
-        <button onClick={() => setWheel(true)} className="chunk-btn flex-1 bg-berry py-2 text-sm">🎡 ROULETTE <span className="text-[10px]">🎟️ {s.tickets}</span></button>
-        <button onClick={() => setTrack(true)} className="chunk-btn flex-1 bg-sky py-2 text-sm">🏁 EVENT {s.tokens}/{nextMs}</button>
-      </div>
-
-      {/* machine */}
-      <div className={`relative mt-4 rounded-[2rem] border-4 border-ink bg-grape p-3 shadow-chunk ${shake ? "animate-shake" : ""}`}>
-        <div className="mx-auto -mt-8 w-fit rounded-2xl border-4 border-ink bg-sun px-5 py-1 font-display text-2xl text-cream text-outline shadow-chunk">SOLO SLOTS</div>
-        <div className="mt-3 grid grid-cols-3 gap-2 rounded-2xl border-4 border-ink bg-lime/80 p-2">
-          {reels.map((sym, i) => (
-            <div key={i} className="relative h-28 overflow-hidden rounded-xl border-4 border-ink bg-cream">
-              {spinning[i] ? (
-                <div className="animate-reel flex flex-col items-center blur-[1px]">
-                  {[...SYMBOLS, ...SYMBOLS].map((x, k) => <span key={k} className="grid h-14 place-items-center text-4xl">{x}</span>)}
-                </div>
-              ) : (
-                <div key={sym + i + s.spins} className="animate-thud grid h-full place-items-center text-6xl drop-shadow-[0_3px_0_var(--ink)]">{sym}</div>
+        {/* machine */}
+        <div className={`relative mx-[60px] ${shake ? "animate-shake" : ""}`}>
+          {/* truss */}
+          <div className="absolute -inset-x-6 top-16 bottom-6 z-0 rounded-xl border-4 border-ink bg-[repeating-linear-gradient(45deg,var(--muted)_0_6px,transparent_6px_18px)] opacity-90" />
+          <div className="relative z-10 mx-auto w-[88%] rounded-t-[1.5rem] border-4 border-b-0 border-ink bg-[oklch(0.25_0.02_270)] p-2 pb-0">
+            <div className="text-center font-display text-2xl tracking-wide text-sun text-outline">SOLO SLOTS</div>
+            <div className="mt-1 flex h-14 items-center justify-center gap-2 rounded-t-xl border-4 border-b-0 border-ink bg-ink">
+              {win ? <span key={win} className="animate-pop font-display text-lg text-sun">{win}</span> : (
+                <><span className="text-2xl">💀</span><div className="leading-tight"><div className="font-display text-sm text-cream">CozyInk5</div><div className="font-display text-sm text-sun">2M</div></div></>
               )}
             </div>
-          ))}
+          </div>
+          <div className="relative z-10 rounded-2xl border-4 border-ink bg-grape p-2 shadow-[0_0_0_3px_var(--berry)]">
+            <div className="mb-2 flex items-center gap-1">
+              <span className="text-2xl">👝</span>
+              <div className="relative h-5 flex-1 rounded-full border-[3px] border-ink bg-ink/60">
+                <span className="absolute inset-0 grid place-items-center font-display text-xs text-cream">{s.tokens % 5}/5</span>
+              </div>
+              <span className="relative text-2xl">⚡<span className="absolute -bottom-1 right-0 font-display text-[10px] text-cream text-outline">60</span></span>
+            </div>
+            <div className="grid grid-cols-3 gap-1.5 rounded-2xl border-4 border-ink bg-sky p-1.5 shadow-[0_0_12px_var(--lime)]">
+              {reels.map((sym, i) => (
+                <div key={i} className="relative h-36 overflow-hidden rounded-lg border-[3px] border-ink bg-cream shadow-[inset_0_10px_10px_-6px_oklch(0_0_0/.35),inset_0_-10px_10px_-6px_oklch(0_0_0/.35)]">
+                  {spinning[i] ? (
+                    <div className="animate-reel flex flex-col items-center blur-[1px]">
+                      {[...SYMBOLS, ...SYMBOLS].map((x, k) => <span key={k} className="grid h-12 place-items-center text-4xl">{x}</span>)}
+                    </div>
+                  ) : (
+                    <div key={sym + i + s.spins} className="animate-thud flex h-full flex-col items-center justify-between py-0.5">
+                      <span className="-mt-5 text-4xl opacity-90">{SYMBOLS[(SYMBOLS.indexOf(sym) + 1) % SYMBOLS.length]}</span>
+                      <span className="text-5xl drop-shadow-[0_3px_0_var(--ink)]">{sym}</span>
+                      <span className="-mb-5 text-4xl opacity-90">{SYMBOLS[(SYMBOLS.indexOf(sym) + 2) % SYMBOLS.length]}</span>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+            <div className="mt-2 flex items-center gap-1">
+              <span className="-rotate-12 rounded-md border-[3px] border-ink bg-sky px-1.5 font-display text-[10px] text-cream">FREE</span>
+              <div className="relative h-5 flex-1 overflow-hidden rounded-full border-[3px] border-ink bg-ink/60">
+                <div className="h-full bg-lime" style={{ width: `${Math.min(100, ((s.tokens % 50) / 50) * 100)}%` }} />
+                <span className="absolute inset-0 grid place-items-center font-display text-[11px] text-cream text-outline">{s.tokens % 50}/50</span>
+              </div>
+              <span className="grid h-7 w-7 rotate-45 place-items-center rounded-md border-[3px] border-ink bg-sun"><span className="-rotate-45 font-display text-sm text-ink">{Math.floor(s.tokens / 50) + 1}</span></span>
+            </div>
+          </div>
         </div>
-        <div className="mt-2 h-8 text-center font-display text-xl text-sun text-outline">{win && <span className="inline-block animate-pop">{win}</span>}</div>
-      </div>
 
-      {/* flash offer */}
-      <div className="mt-4 flex items-center gap-3 rounded-2xl border-4 border-ink bg-gradient-to-r from-berry to-sun-dark p-2 shadow-chunk">
-        <span className="animate-bob text-4xl">🎁</span>
-        <div className="flex-1"><div className="font-display text-cream text-outline">FLASH OFFER</div><div className="text-xs font-bold">100 Spins + 1 🎟️ · ends {clock(offerLeft)}</div></div>
-        <button onClick={() => { if (spend({ coins: 20000 })) { grant({ spins: 100, tickets: 1 }); toast.success("Offer claimed!"); } else toast.error("Need 20K coins"); }}
-          className="chunk-btn bg-lime px-3 py-1.5 text-sm">🪙 20K</button>
-      </div>
+        {/* events row */}
+        <div className="relative mt-4 overflow-hidden">
+          <div className="flex w-max animate-marquee gap-3 px-2">
+            {[...EVENTS, ...EVENTS].map((e, i) => (
+              <div key={i} className="flex w-[68px] flex-col items-center">
+                <span className="text-4xl drop-shadow-[0_3px_0_var(--ink)]">{e.icon}</span>
+                <span className="-mt-1 rounded-md border-2 border-ink bg-cream px-1 font-display text-[10px] text-berry">{t(e.h)}</span>
+                <span className="text-center font-display text-[10px] leading-tight text-cream text-outline">{e.name.toUpperCase()}</span>
+              </div>
+            ))}
+          </div>
+        </div>
 
-      {/* spin controls */}
-      <div className="mt-5 flex items-center justify-center gap-4">
-        <button onClick={() => setBet((b) => (b === 1 ? 3 : b === 3 ? 5 : 1))} className="chunk-btn h-16 w-16 rotate-12 bg-sun text-2xl">x{bet}</button>
-        <button
-          onClick={() => { if (!auto) spin(); }}
-          onPointerDown={() => { holdT.current = setTimeout(() => { setAuto(true); toast("Autospin ON"); }, 700); }}
-          onPointerUp={() => clearTimeout(holdT.current)} onPointerLeave={() => clearTimeout(holdT.current)}
-          className={`chunk-btn h-32 w-44 rounded-[2rem] text-5xl ${auto ? "bg-berry" : "bg-sun"}`}
-        >
-          <span>{auto ? "AUTO" : "SPIN"}<span className="block text-[11px] text-ink [-webkit-text-stroke:0]">HOLD FOR AUTOSPIN</span></span>
-        </button>
-        <button onClick={() => setAuto(false)} disabled={!auto} className="chunk-btn h-16 w-16 -rotate-12 bg-sky text-xl">⏹</button>
+        {/* bottom corners */}
+        <div className="mt-3 flex items-end justify-between px-1 pb-8">
+          <SideIcon icon="🌀" title="SPINNING" timer={t(15)} />
+          <button onClick={offerFn} className="flex flex-col items-center">
+            <span className="rounded-full border-[3px] border-ink bg-berry px-1.5 font-display text-[11px] text-cream">{clock(offerLeft)}</span>
+            <span className="grid h-14 w-14 animate-bob place-items-center rounded-full border-4 border-ink bg-sky text-3xl shadow-chunk">🐷</span>
+            <span className="font-display text-[10px] text-sun text-outline">FLASH OFFER</span>
+          </button>
+        </div>
       </div>
 
       <RouletteModal open={wheel} onClose={() => setWheel(false)} />
@@ -142,6 +202,17 @@ const PRIZES = [
   { label: "10K ⭐", r: { solo: 10000 } }, { label: "100 ⚡", r: { spins: 100 } },
 ];
 const SEG_COLORS = ["var(--berry)", "var(--sun)", "var(--sky)", "var(--lime)"];
+
+function SideIcon({ icon, title, timer, badge }: { icon: string; title: string; timer?: string; badge?: string }) {
+  return (
+    <div className="flex flex-col items-center">
+      <span className="text-4xl drop-shadow-[0_3px_0_var(--ink)]">{icon}</span>
+      {badge && <span className="relative z-10 -mt-3 rounded-md border-2 border-ink bg-ink px-1 font-display text-[11px] text-sun">{badge}</span>}
+      <span className="text-center font-display text-[11px] leading-tight text-cream text-outline">{title}</span>
+      {timer && <span className="font-display text-[11px] leading-tight text-sun text-outline">{timer}</span>}
+    </div>
+  );
+}
 
 function RouletteModal({ open, onClose }: { open: boolean; onClose: () => void }) {
   const { s, spend, grant } = useGame();

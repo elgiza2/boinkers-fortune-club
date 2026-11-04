@@ -1,71 +1,92 @@
 import { Link } from "@tanstack/react-router";
 import type { ReactNode } from "react";
-import { fmt, useGame, MAX_SPINS, clock } from "@/lib/game";
+import hero from "@/assets/hero-character.png";
+import sky from "@/assets/night-sky.jpg";
+import { fmt, useGame, MAX_SPINS } from "@/lib/game";
 
 export function TopBar() {
-  const { s, nextSpinIn, toggleSound } = useGame();
+  const { s, toggleSound } = useGame();
   return (
-    <header className="sticky top-0 z-30 bg-night/95 backdrop-blur px-3 pt-3 pb-2 border-b-4 border-ink">
-      <div className="flex items-center gap-2">
-        <div className="relative grid h-12 w-12 shrink-0 place-items-center rounded-full border-4 border-ink bg-lime text-xl font-display text-ink shadow-chunk">
-          {s.level}
-          <span className="absolute -bottom-2 rounded-md border-2 border-ink bg-sun px-1 text-[9px] leading-tight">LVL</span>
+    <header className="relative z-30 flex items-center gap-1.5 border-b-4 border-ink bg-night px-2 py-2">
+      <div className="relative shrink-0">
+        <div className="h-14 w-14 overflow-hidden rounded-full border-4 border-lime bg-ink ring-4 ring-ink">
+          <img src={hero} alt="" className="h-full w-full scale-125 object-cover object-top" />
         </div>
-        <div className="flex flex-1 flex-wrap gap-1.5">
-          <Pill icon="🪙" value={fmt(s.coins)} />
-          <Pill icon="⭐" value={fmt(s.solo)} label="SOLO" />
-          <Pill icon="🎟️" value={String(s.tickets)} />
-        </div>
-        <button onClick={toggleSound} aria-label="Toggle sound" className="chunk-btn h-10 w-10 bg-sky text-lg">{s.sound ? "🔊" : "🔇"}</button>
+        <span className="absolute -bottom-1 -left-1 grid h-6 w-6 place-items-center rounded-full border-[3px] border-ink bg-sun font-display text-xs text-ink">{s.level}</span>
       </div>
-      <div className="mt-2 flex items-center gap-2">
-        <span className="text-xl">⚡</span>
-        <div className="relative h-5 flex-1 overflow-hidden rounded-full border-[3px] border-ink bg-ink/60">
-          <div className="h-full bg-gradient-to-r from-sky to-lime transition-all" style={{ width: `${Math.min(100, (s.spins / MAX_SPINS) * 100)}%` }} />
-          <span className="absolute inset-0 grid place-items-center font-display text-xs text-outline">{s.spins}/{MAX_SPINS}</span>
-        </div>
-        <span className="w-16 text-right font-display text-[11px] text-sun">{nextSpinIn ? `+1 ${clock(nextSpinIn).slice(3)}` : "FULL"}</span>
+      <div className="min-w-0 leading-tight">
+        <div className="truncate font-display text-xs text-cream">Player</div>
+        <div className="flex items-center gap-1 font-display text-sm text-sky"><span>🔵</span>{fmt(s.solo)}</div>
       </div>
+      <div className="ml-auto flex items-center gap-1">
+        <Pill icon="🪙" value={fmt(s.coins)} />
+        <Pill icon="⭐" value={fmt(s.solo)} />
+        <Pill icon="⚡" value={String(s.spins)} />
+      </div>
+      <button onClick={toggleSound} aria-label="Toggle sound" className="chunk-btn h-9 w-9 shrink-0 rounded-xl bg-sky text-base">{s.sound ? "🔊" : "🔇"}</button>
     </header>
   );
 }
 
-function Pill({ icon, value, label }: { icon: string; value: string; label?: string }) {
+function Pill({ icon, value }: { icon: string; value: string }) {
   return (
-    <div className="flex items-center gap-1 rounded-full border-[3px] border-ink bg-ink/70 py-0.5 pl-1 pr-2.5">
-      <span className="text-base">{icon}</span>
+    <div className="relative flex h-7 items-center rounded-full border-[3px] border-ink bg-ink/80 pl-5 pr-2">
+      <span className="absolute -left-2 text-xl drop-shadow-[0_2px_0_var(--ink)]">{icon}</span>
       <span className="font-display text-sm text-cream">{value}</span>
-      {label && <span className="text-[9px] font-bold text-sun">{label}</span>}
     </div>
   );
 }
 
-const tabs = [
-  { to: "/upgrade", icon: "🚀", label: "UPGRADE" },
-  { to: "/", icon: "🎰", label: "SLOT" },
-  { to: "/earn", icon: "💰", label: "EARN" },
-] as const;
+function NavItem({ icon, label, to, onClick, dot }: { icon: string; label: string; to?: "/" | "/upgrade" | "/earn"; onClick?: () => void; dot?: boolean }) {
+  const inner = (
+    <>
+      <span className="relative text-4xl drop-shadow-[0_3px_0_var(--ink)] transition-transform group-data-[status=active]:scale-110">
+        {icon}{dot && <span className="absolute -right-1 top-0 h-3.5 w-3.5 rounded-full border-2 border-ink bg-berry" />}
+      </span>
+      <span className="font-display text-[11px] text-muted-foreground group-data-[status=active]:text-sun">{label}</span>
+    </>
+  );
+  const cls = "group flex flex-col items-center justify-end gap-0.5 border-ink/60 py-2";
+  if (onClick) return <button onClick={onClick} className={cls}>{inner}</button>;
+  return <Link to={to!} activeOptions={{ exact: true }} className={cls}>{inner}</Link>;
+}
 
-export function BottomNav() {
+export function BottomNav({ center, onWheel, onTrack }: { center?: ReactNode; onWheel?: (() => void) | undefined; onTrack?: (() => void) | undefined }) {
+  const { s } = useGame();
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-30 mx-auto grid max-w-md grid-cols-3 border-t-4 border-ink bg-night pb-[env(safe-area-inset-bottom)]">
-      {tabs.map((t) => (
-        <Link key={t.to} to={t.to} activeOptions={{ exact: true }}
-          className="group flex flex-col items-center gap-0.5 py-2 font-display text-xs text-muted-foreground data-[status=active]:text-sun">
-          <span className="text-3xl transition-transform group-data-[status=active]:-translate-y-1 group-data-[status=active]:scale-125">{t.icon}</span>
-          {t.label}
-        </Link>
-      ))}
+    <nav className="fixed inset-x-0 bottom-0 z-30 mx-auto max-w-md pb-[env(safe-area-inset-bottom)]">
+      <div className="grid h-[84px] grid-cols-5 border-t-4 border-ink bg-night">
+        <NavItem icon="🚀" label="UPGRADE" to="/upgrade" dot />
+        <NavItem icon="💰" label="EARN" to="/earn" />
+        <div />
+        {onTrack ? <NavItem icon="🏁" label="EVENT" onClick={onTrack} /> : <NavItem icon="🎰" label="SLOT" to="/" />}
+        {onWheel ? <NavItem icon="🎡" label="WHEEL" onClick={onWheel} dot={s.tickets > 0} /> : <NavItem icon="🎡" label="WHEEL" to="/" />}
+      </div>
+      <div className="pointer-events-none absolute inset-x-0 bottom-[env(safe-area-inset-bottom)] flex justify-center">
+        <div className="pointer-events-auto relative -mb-0 flex w-[34%] flex-col items-center rounded-t-[2.5rem] border-4 border-b-0 border-ink bg-night px-2 pb-2 pt-2">
+          {center ?? (
+            <Link to="/" className="chunk-btn h-20 w-full rounded-[1.75rem] bg-sun text-3xl">SPIN</Link>
+          )}
+          <div className="relative mt-1.5 h-5 w-full overflow-hidden rounded-full border-[3px] border-ink bg-ink">
+            <div className="h-full bg-gradient-to-b from-sky to-[oklch(0.6_0.16_240)]" style={{ width: `${Math.min(100, (s.spins / MAX_SPINS) * 100)}%` }} />
+            <span className="absolute left-1 top-1/2 -translate-y-1/2 text-xs">⚡</span>
+            <span className="absolute inset-0 grid place-items-center font-display text-[11px] text-cream text-outline">{s.spins}/{MAX_SPINS}</span>
+          </div>
+        </div>
+      </div>
     </nav>
   );
 }
 
-export function Screen({ children }: { children: ReactNode }) {
+export function Screen({ children, center, onWheel, onTrack, bare }: { children: ReactNode; center?: ReactNode; onWheel?: () => void; onTrack?: () => void; bare?: boolean }) {
   return (
-    <div className="mx-auto min-h-screen max-w-md bg-stage pb-24">
-      <TopBar />
-      <main className="px-3 py-3">{children}</main>
-      <BottomNav />
+    <div className="relative mx-auto min-h-screen max-w-md overflow-x-hidden bg-night pb-28">
+      <img src={sky} alt="" aria-hidden className="pointer-events-none fixed inset-x-0 top-0 mx-auto h-screen w-full max-w-md object-cover" />
+      <div className="relative">
+        <TopBar />
+        <main className={bare ? "" : "px-3 py-3"}>{children}</main>
+      </div>
+      <BottomNav center={center} onWheel={onWheel} onTrack={onTrack} />
     </div>
   );
 }
