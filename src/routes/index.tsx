@@ -71,25 +71,24 @@ function Home() {
   const offerFn = () => { if (spend({ coins: 20000 })) { grant({ spins: 100, tickets: 1 }); toast.success("Offer claimed!"); } else toast.error("Need 20K coins for this offer"); };
 
   const spinBtn = (
-    <div className="relative -mt-14 w-full">
-      <button
-        onClick={() => { if (auto) setAuto(false); else spin(); }}
-        onPointerDown={() => { holdT.current = setTimeout(() => { setAuto(true); toast("Autospin ON — tap to stop"); }, 700); }}
-        onPointerUp={() => clearTimeout(holdT.current)} onPointerLeave={() => clearTimeout(holdT.current)}
-        className={`chunk-btn h-28 w-full rounded-[2rem] border-[5px] ${auto ? "bg-berry" : "bg-sun"}`}
-        style={{ boxShadow: "inset 0 -8px 0 var(--sun-dark), inset 0 4px 0 oklch(1 0 0 / .5), 0 6px 0 var(--ink)" }}
-      >
-        <span className="leading-none">
-          <span className="block text-4xl">{auto ? "STOP" : "SPIN"}</span>
-          <span className="mt-1 block text-[10px] leading-tight text-sun-dark [-webkit-text-stroke:0]">HOLD FOR<br />AUTOSPIN</span>
-        </span>
-      </button>
+    <button
+      onClick={() => { if (auto) setAuto(false); else spin(); }}
+      onPointerDown={() => { holdT.current = setTimeout(() => { setAuto(true); toast("Autospin ON — tap to stop"); }, 700); }}
+      onPointerUp={() => clearTimeout(holdT.current)} onPointerLeave={() => clearTimeout(holdT.current)}
+      className={`chunk-btn relative h-full w-full rounded-[1.5rem] border-[5px] ${auto ? "bg-berry" : "bg-sun"}`}
+      style={{ boxShadow: "inset 0 -7px 0 var(--sun-dark), inset 0 4px 0 oklch(1 0 0 / .5), 0 5px 0 var(--ink)" }}
+    >
+      <span className="leading-none">
+        <span className="block text-2xl">{auto ? "STOP" : "SPIN"}</span>
+        <span className="mt-1 block text-[9px] leading-tight text-sun-dark [-webkit-text-stroke:0]">HOLD FOR<br />AUTOSPIN</span>
+      </span>
       <button onClick={() => setBet((b) => (b === 1 ? 3 : b === 3 ? 5 : 1))}
-        className="chunk-btn absolute -right-5 -top-4 h-12 w-12 rotate-45 rounded-xl bg-sun">
-        <span className="-rotate-45 text-lg">x{bet}</span>
+        className="chunk-btn absolute -right-3 -top-3 h-10 w-10 rotate-45 rounded-lg bg-sky">
+        <span className="-rotate-45 text-sm">x{bet}</span>
       </button>
-    </div>
+    </button>
   );
+
 
   return (
     <Screen bare center={spinBtn} onWheel={() => setWheel(true)} onTrack={() => setTrack(true)}>
