@@ -51,7 +51,7 @@ function NavItem({ icon, label, to, onClick, dot }: { icon: string; label: strin
   return <Link to={to!} activeOptions={{ exact: true }} className={cls}>{inner}</Link>;
 }
 
-export function BottomNav({ center, onWheel, onTrack }: { center?: ReactNode; onWheel?: () => void; onTrack?: () => void }) {
+export function BottomNav({ center, onWheel, onTrack }: { center?: ReactNode; onWheel?: (() => void) | undefined; onTrack?: (() => void) | undefined }) {
   const { s } = useGame();
   return (
     <nav className="fixed inset-x-0 bottom-0 z-30 mx-auto max-w-md pb-[env(safe-area-inset-bottom)]">
