@@ -1,7 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from "react";
 import { bankProduction, buyCharacter, mergeRate, moveCharacter, starterBoard, type Board } from "./merge";
-import { supabase } from "@/integrations/supabase/client";
-import type { Json } from "@/integrations/supabase/types";
 
 export const MAX_SPINS = 50;
 export const SPIN_REGEN_MS = 60_000; // 1 spin / minute
@@ -138,8 +136,6 @@ interface Ctx {
   gainEvent: (tokens: number) => number;
   buyMerge: () => void;
   moveMerge: (from: number, to: number) => void;
-  cloudUser: boolean;
-  cloudStatus: "local" | "loading" | "saving" | "saved" | "error";
 }
 const GameCtx = createContext<Ctx | null>(null);
 const KEY = "solo-slots-v1";
@@ -149,11 +145,6 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const [ready, setReady] = useState(false);
   const [now, setNow] = useState(() => Date.now());
   const loaded = useRef(false);
-  const latest = useRef(s);
-  latest.current = s;
-  const [cloudId, setCloudId] = useState<string | null>(null);
-  const [cloudStatus, setCloudStatus] = useState<Ctx["cloudStatus"]>("local");
-  const [cloudLoaded, setCloudLoaded] = useState(false);
 
   useEffect(() => {
     try {
@@ -166,43 +157,6 @@ export function GameProvider({ children }: { children: ReactNode }) {
   }, []);
   useEffect(() => { if (loaded.current) localStorage.setItem(KEY, JSON.stringify(s)); }, [s]);
 
-  useEffect(() => {
-    let active = true;
-    let generation = 0;
-    const sync = async (userId: string | null) => {
-      const current = ++generation;
-      setCloudLoaded(false); setCloudId(userId);
-      if (!userId) { setCloudStatus("local"); return; }
-      setCloudStatus("loading");
-      const { data, error } = await supabase.from("game_saves").select("state").eq("user_id", userId).maybeSingle();
-      if (!active || current !== generation) return;
-      if (error) { setCloudStatus("error"); return; }
-      if (data?.state && typeof data.state === "object" && !Array.isArray(data.state)) {
-        const saved = data.state as unknown as Partial<GameState>;
-        if (Array.isArray(saved.mergeBoard) && saved.mergeBoard.length === 12 && saved.mergeBoard.every(v => v === null || (Number.isInteger(v) && v >= 1 && v <= 6))) {
-          setS({ ...initial(), ...saved });
-        }
-      }
-      setCloudLoaded(true); setCloudStatus("saved");
-    };
-    void supabase.auth.getSession().then(({ data }) => sync(data.session?.user.id ?? null));
-    const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === "SIGNED_IN" || event === "SIGNED_OUT") void sync(session?.user.id ?? null);
-    });
-    return () => { active = false; listener.subscription.unsubscribe(); };
-  }, []);
-  // Only durable actions change this snapshot; spin regeneration must not postpone saves.
-  const saveSnapshot = JSON.stringify({ ...s, lastSpinRegen: 0 });
-  useEffect(() => {
-    if (!cloudId || !cloudLoaded) return;
-    let active = true;
-    const timer = setTimeout(async () => {
-      setCloudStatus("saving");
-      const { error } = await supabase.from("game_saves").upsert({ user_id: cloudId, state: latest.current as unknown as Json, updated_at: new Date().toISOString() });
-      if (active) setCloudStatus(error ? "error" : "saved");
-    }, 700);
-    return () => { active = false; clearTimeout(timer); };
-  }, [saveSnapshot, cloudId, cloudLoaded]);
 
   // spin regen
   useEffect(() => {
@@ -290,7 +244,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
   }, []);
   const toggleSound = useCallback(() => setS((p) => ({ ...p, sound: !p.sound })), []);
 
-  return <GameCtx.Provider value={{ s, ready, pendingSolo, nextSpinIn, grant, spend, claimSolo, upgrade, completeTask, claimMilestone, toggleSound, gainPass, gainEvent, buyMerge, moveMerge, cloudUser: Boolean(cloudId), cloudStatus }}>{children}</GameCtx.Provider>;
+  return <GameCtx.Provider value={{ s, ready, pendingSolo, nextSpinIn, grant, spend, claimSolo, upgrade, completeTask, claimMilestone, toggleSound, gainPass, gainEvent, buyMerge, moveMerge }}>{children}</GameCtx.Provider>;
 }
 
 export function useGame() {
