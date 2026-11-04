@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Skull } from "lucide-react";
 import { Screen } from "@/components/game/Shell";
-import { SYMBOLS, type Sym, slotPayout, useGame, fmt, beep, haptic } from "@/lib/game";
+import { SYMBOLS, type Sym, slotPayout, useGame, fmt, beep, haptic, passNeed } from "@/lib/game";
 import { SYM_ART } from "@/lib/art";
 
 export const Route = createFileRoute("/")({
@@ -29,7 +29,7 @@ function SymImg({ sym, className }: { sym: Sym; className: string }) {
 }
 
 function Home() {
-  const { s, spend, grant } = useGame();
+  const { s, spend, grant, gainPass } = useGame();
   const [reels, setReels] = useState<Sym[]>(["bolt", "coin", "chest"]);
   const [spinning, setSpinning] = useState([false, false, false]);
   const [bet, setBet] = useState(1);
@@ -43,6 +43,8 @@ function Home() {
     if (busy) return;
     if (!spend({ spins: bet })) { toast.error("Out of spins! Wait for recharge or earn more."); setAuto(false); return; }
     haptic(); setWin(null);
+    const up = gainPass(bet);
+    if (up) setTimeout(() => toast.success(`Pass level ${up}! Gifts added`), 1500);
     const result: Sym[] = [rnd(), rnd(), rnd()];
     setSpinning([true, true, true]);
     result.forEach((sym, i) => setTimeout(() => {
@@ -125,6 +127,15 @@ function Home() {
                   )}
                 </div>
               ))}
+            </div>
+            {/* spin pass */}
+            <div className="mt-3 flex items-center gap-2 rounded-full bg-ink/40 p-1.5">
+              <span className={`rounded-full px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide ${s.premium ? "bg-sun text-ink" : "bg-sky text-cream"}`}>{s.premium ? "Premium" : "Free"}</span>
+              <div className="relative h-6 flex-1 overflow-hidden rounded-full bg-cream/15">
+                <div className="h-full rounded-full bg-lime transition-[width] duration-500" style={{ width: `${Math.min(100, (s.passXp / passNeed(s.passLevel)) * 100)}%` }} />
+                <span className="absolute inset-0 grid place-items-center text-xs font-semibold text-cream">{fmt(s.passXp)}/{fmt(passNeed(s.passLevel))}</span>
+              </div>
+              <span className="grid h-8 min-w-8 place-items-center rounded-full bg-sun px-1.5 text-sm font-bold text-ink">{s.passLevel}</span>
             </div>
           </div>
         </div>
