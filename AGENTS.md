@@ -14,3 +14,5 @@
 - Game state uses the existing device-local provider until account persistence is requested; connected Cloud resources remain unused.
 - Render drag overlays in a body portal, outside frosted-glass ancestors, so backdrop filters cannot offset drag collision coordinates.
 - Wheel rewards and landing angles share a pure tested module so displayed segments match awarded prizes.
+- Screen supports opting out of bottom navigation for standalone experiences while preserving shared top balances.
+- NFT artwork catalog is separate from device-local favorites; the gallery does not mint, trade or claim blockchain ownership.
