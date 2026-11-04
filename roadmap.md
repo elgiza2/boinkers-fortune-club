@@ -1,6 +1,6 @@
 # Roadmap
-- [ ] Defer database use: remove account sync and keep Merge Island on existing local game state
-- [ ] Merge Island: clean board, coin purchases, matching-character drag merge, evolving families, SOLO production, tests
+- [x] Defer database use: remove account sync and keep Merge Island on existing local game state
+- [x] Merge Island: clean board, coin purchases, matching-character drag merge, evolving families, SOLO production, tests
 - [x] Home: side icons/events removed, no page scroll
 - [x] Spins count under SPIN; SPIN + x1 bet like reference
 - [x] Bottom nav (UPGRADE, EARN, SPIN, STICKERS, WHEEL) + wheel page
