@@ -81,7 +81,7 @@ export function BottomNav({ center, onWheel, onTrack }: { center?: ReactNode; on
             )}
           </div>
           {onTrack ? <NavItem icon="🏁" label="EVENT" onClick={onTrack} /> : <NavItem icon="🎰" label="SLOT" to="/" />}
-          {onWheel ? <NavItem icon="🎡" label="WHEEL" onClick={onWheel} dot={s.tickets > 0} : <NavItem icon="🎡" label="WHEEL" to="/" />}
+          {onWheel ? <NavItem icon="🎡" label="WHEEL" onClick={onWheel} {onWheel ? <NavItem icon="🎡" label="WHEEL" onClick={onWheel} dot={s.tickets > 0} /> : <NavItem icon="🎡" label="WHEEL" to="/" />} <NavItem icon="🎡" label="WHEEL" to="/" />}
         </div>
       </div>
     </nav>
