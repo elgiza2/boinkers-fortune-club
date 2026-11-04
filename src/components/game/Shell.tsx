@@ -63,7 +63,7 @@ export function BottomNav({ center, onWheel, onTrack }: { center?: ReactNode; on
         {onWheel ? <NavItem icon="🎡" label="WHEEL" onClick={onWheel} dot={s.tickets > 0} /> : <NavItem icon="🎡" label="WHEEL" to="/" />}
       </div>
       <div className="pointer-events-none absolute inset-x-0 bottom-[env(safe-area-inset-bottom)] flex justify-center">
-        <div className="pointer-events-auto relative -mb-0 flex w-[40%] flex-col items-center rounded-t-[2.5rem] border-4 border-b-0 border-ink bg-night px-2 pb-2 pt-2">
+        <div className="pointer-events-auto relative -mb-0 flex w-[34%] flex-col items-center rounded-t-[2.5rem] border-4 border-b-0 border-ink bg-night px-2 pb-2 pt-2">
           {center ?? (
             <Link to="/" className="chunk-btn h-20 w-full rounded-[1.75rem] bg-sun text-3xl">SPIN</Link>
           )}

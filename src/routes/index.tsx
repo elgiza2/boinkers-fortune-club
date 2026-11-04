@@ -96,7 +96,7 @@ function Home() {
       <div className="relative px-1 pt-3">
         {/* side columns */}
         <div className="absolute left-0 top-3 z-20 flex w-[72px] flex-col items-center gap-3">
-          <SideIcon icon="🏆" title="FISH" badge={`#${fmt(5127)}`} />
+          <SideIcon icon="🏆" title="FISH" badge="#5,127" />
           <SideIcon icon="⭐" title="SOLO STARS" />
           <SideIcon icon="🎃" title="SCRATCH" timer={t(14)} />
           <button onClick={() => setWheel(true)} className="flex flex-col items-center">
@@ -121,8 +121,8 @@ function Home() {
         {/* machine */}
         <div className={`relative mx-[60px] ${shake ? "animate-shake" : ""}`}>
           {/* truss */}
-          <div className="absolute -inset-x-6 top-16 bottom-6 -z-10 rounded-xl border-4 border-ink bg-[repeating-linear-gradient(45deg,var(--muted)_0_6px,transparent_6px_18px)] opacity-90" />
-          <div className="mx-auto w-[88%] rounded-t-[1.5rem] border-4 border-b-0 border-ink bg-[oklch(0.25_0.02_270)] p-2 pb-0">
+          <div className="absolute -inset-x-6 top-16 bottom-6 z-0 rounded-xl border-4 border-ink bg-[repeating-linear-gradient(45deg,var(--muted)_0_6px,transparent_6px_18px)] opacity-90" />
+          <div className="relative z-10 mx-auto w-[88%] rounded-t-[1.5rem] border-4 border-b-0 border-ink bg-[oklch(0.25_0.02_270)] p-2 pb-0">
             <div className="text-center font-display text-2xl tracking-wide text-sun text-outline">SOLO SLOTS</div>
             <div className="mt-1 flex h-14 items-center justify-center gap-2 rounded-t-xl border-4 border-b-0 border-ink bg-ink">
               {win ? <span key={win} className="animate-pop font-display text-lg text-sun">{win}</span> : (
@@ -130,7 +130,7 @@ function Home() {
               )}
             </div>
           </div>
-          <div className="rounded-2xl border-4 border-ink bg-grape p-2 shadow-[0_0_0_3px_var(--berry)]">
+          <div className="relative z-10 rounded-2xl border-4 border-ink bg-grape p-2 shadow-[0_0_0_3px_var(--berry)]">
             <div className="mb-2 flex items-center gap-1">
               <span className="text-2xl">👝</span>
               <div className="relative h-5 flex-1 rounded-full border-[3px] border-ink bg-ink/60">
@@ -207,7 +207,7 @@ function SideIcon({ icon, title, timer, badge }: { icon: string; title: string; 
   return (
     <div className="flex flex-col items-center">
       <span className="text-4xl drop-shadow-[0_3px_0_var(--ink)]">{icon}</span>
-      {badge && <span className="-mt-2 rounded-md border-2 border-ink bg-ink px-1 font-display text-[11px] text-sun">{badge}</span>}
+      {badge && <span className="relative z-10 -mt-3 rounded-md border-2 border-ink bg-ink px-1 font-display text-[11px] text-sun">{badge}</span>}
       <span className="text-center font-display text-[11px] leading-tight text-cream text-outline">{title}</span>
       {timer && <span className="font-display text-[11px] leading-tight text-sun text-outline">{timer}</span>}
     </div>
