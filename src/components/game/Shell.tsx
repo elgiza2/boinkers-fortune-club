@@ -70,11 +70,11 @@ export function BottomNav({ center }: { center?: ReactNode }) {
   const pct = Math.min(100, (s.spins / MAX_SPINS) * 100);
   return (
     <nav className="relative z-30 shrink-0 px-3 pb-[max(10px,env(safe-area-inset-bottom))] pt-2">
-      <div className="relative grid h-[74px] grid-cols-[1fr_1fr_1.75fr_1fr_1fr] rounded-[28px] border border-cream/12 bg-ink/75 shadow-[0_18px_44px_-18px_oklch(0_0_0/.9),inset_0_1px_0_oklch(1_0_0/.12)] backdrop-blur-3xl backdrop-saturate-150">
+      <div className="relative grid h-[74px] grid-cols-[1fr_1fr_1.75fr_1fr_1fr] rounded-[28px] border border-cream/12 bg-ink/80 shadow-[0_18px_44px_-18px_oklch(0_0_0/.9),inset_0_1px_0_oklch(1_0_0/.12)] backdrop-blur-3xl backdrop-saturate-150">
         <NavItem icon={Rocket} label="UPGRADE" to="/upgrade" />
         <NavItem icon={Coins} label="EARN" to="/earn" />
         <div className="relative">
-          <div className="absolute left-1/2 top-[-50px] h-[80px] w-[80px] -translate-x-1/2">
+          <div className="absolute left-1/2 top-[-56px] h-[80px] w-[80px] -translate-x-1/2">
             {center ?? (
               <Link
                 to="/"
@@ -86,7 +86,7 @@ export function BottomNav({ center }: { center?: ReactNode }) {
           </div>
           <div className="absolute inset-x-2.5 bottom-3 flex h-[20px] items-center gap-2 rounded-full bg-cream/12 pl-2.5 pr-3">
             <Zap className="h-3.5 w-3.5 shrink-0 text-sun" strokeWidth={2.4} />
-            <div className="h-[5px] flex-1 overflow-hidden rounded-full bg-cream/20">
+            <div className="h-[6px] flex-1 overflow-hidden rounded-full bg-cream/20">
               <div className="h-full rounded-full bg-gradient-to-r from-sun to-sun-dark transition-[width] duration-300" style={{ width: `${pct}%` }} />
             </div>
             <span className="text-[10px] font-semibold leading-none tabular-nums text-cream/80">{s.spins}/{MAX_SPINS}</span>
