@@ -1,10 +1,11 @@
 import { Link } from "@tanstack/react-router";
 import type { ReactNode } from "react";
-import { Coins, Disc3, Gem, Rocket, Volume2, VolumeX, X, Zap } from "lucide-react";
+import { Volume2, VolumeX, X } from "lucide-react";
 import hero from "@/assets/hero-character.png";
 import sky from "@/assets/night-sky.jpg";
 import { fmt, useGame, MAX_SPINS } from "@/lib/game";
 import { ART } from "@/lib/art";
+import nftIcon from "@/assets/nav-nft.png";
 
 export function TopBar() {
   const { s, toggleSound } = useGame();
@@ -38,62 +39,49 @@ function Pill({ icon, value }: { icon: string; value: string }) {
 }
 
 type To = "/" | "/upgrade" | "/earn" | "/nft" | "/wheel";
-
-function NavItem({ icon: Icon, label, to }: { icon: typeof Rocket; label: string; to: To }) {
+function NavItem({ icon, label, to, dot, divider }: { icon: string; label: string; to: To; dot?: boolean; divider?: "l" | "r" }) {
   return (
-    <Link to={to} activeOptions={{ exact: true }} className="group flex flex-col items-center justify-center gap-1.5">
-      {({ isActive }) => (
-        <>
-          <span
-            className={`grid h-9 w-9 place-items-center rounded-[13px] transition-all duration-300 ${
-              isActive ? "bg-cream/15 text-sun shadow-[inset_0_1px_0_oklch(1_0_0/.2)]" : "text-cream/70 group-active:scale-90"
-            }`}
-          >
-            <Icon className="h-5 w-5" strokeWidth={2.1} />
-          </span>
-          <span
-            className={`text-[10px] font-semibold uppercase leading-none tracking-[0.12em] transition-colors duration-300 ${
-              isActive ? "text-cream" : "text-cream/60"
-            }`}
-          >
-            {label}
-          </span>
-        </>
-      )}
+    <Link
+      to={to}
+      activeOptions={{ exact: true }}
+      className={`group flex flex-col items-center justify-center gap-1 border-ink/60 ${divider === "r" ? "border-r-2" : divider === "l" ? "border-l-2" : ""}`}
+    >
+      <span className="relative">
+        <img src={icon} alt="" className="h-10 w-10 object-contain transition-transform group-active:scale-90 group-data-[status=active]:scale-110" />
+        {dot && <span className="absolute -right-0.5 -top-0.5 h-3.5 w-3.5 rounded-full border-2 border-ink bg-berry" />}
+      </span>
+      <span className="font-display text-[11px] leading-none text-muted-foreground group-data-[status=active]:text-sun">{label}</span>
     </Link>
   );
 }
 
-/** Dark frosted-glass iOS tab bar: crisp line icons, no dots, SPIN floats out of the middle, spins meter under it. */
+/** Bottom bar: big diamond SPIN rises out of the middle, spins meter sits under it inside the bar. */
 export function BottomNav({ center }: { center?: ReactNode }) {
   const { s } = useGame();
   const pct = Math.min(100, (s.spins / MAX_SPINS) * 100);
   return (
-    <nav className="relative z-30 shrink-0 px-3 pb-[max(10px,env(safe-area-inset-bottom))] pt-2">
-      <div className="relative grid h-[74px] grid-cols-[1fr_1fr_1.75fr_1fr_1fr] rounded-[28px] border border-cream/12 bg-ink/80 shadow-[0_18px_44px_-18px_oklch(0_0_0/.9),inset_0_1px_0_oklch(1_0_0/.12)] backdrop-blur-3xl backdrop-saturate-150">
-        <NavItem icon={Rocket} label="UPGRADE" to="/upgrade" />
-        <NavItem icon={Coins} label="EARN" to="/earn" />
+    <nav className="relative z-30 shrink-0 pb-[env(safe-area-inset-bottom)]">
+      <div className="relative grid h-[78px] grid-cols-[1fr_1fr_1.9fr_1fr_1fr] border-t-[3px] border-ink bg-night">
+        <NavItem icon={ART.rocket} label="UPGRADE" to="/upgrade" dot divider="r" />
+        <NavItem icon={ART.bag} label="EARN" to="/earn" divider="r" />
         <div className="relative">
-          <div className="absolute left-1/2 top-[-56px] h-[80px] w-[80px] -translate-x-1/2">
+          <div className="absolute left-1/2 top-[-58px] h-[112px] w-[112px] -translate-x-1/2">
             {center ?? (
-              <Link
-                to="/"
-                className="grid h-full w-full place-items-center rounded-[24px] border border-cream/25 bg-gradient-to-b from-sun to-sun-dark shadow-[0_16px_30px_-14px_oklch(0_0_0/.85),inset_0_1px_0_oklch(1_0_0/.6)] transition-transform active:scale-95"
-              >
-                <span className="font-display text-base leading-none text-ink">SPIN</span>
+              <Link to="/" className="chunk-btn h-full w-full rounded-[2rem] bg-sun">
+                <span className="font-display text-2xl leading-none">SPIN</span>
               </Link>
             )}
           </div>
-          <div className="absolute inset-x-2.5 bottom-3 flex h-[20px] items-center gap-2 rounded-full bg-cream/12 pl-2.5 pr-3">
-            <Zap className="h-3.5 w-3.5 shrink-0 text-sun" strokeWidth={2.4} />
-            <div className="h-[6px] flex-1 overflow-hidden rounded-full bg-cream/20">
-              <div className="h-full rounded-full bg-gradient-to-r from-sun to-sun-dark transition-[width] duration-300" style={{ width: `${pct}%` }} />
+          <div className="absolute inset-x-2 bottom-2.5 flex h-[22px] items-center rounded-full border-[3px] border-ink bg-ink">
+            <img src={ART.bolt} alt="" className="absolute -left-2.5 h-7 w-7 object-contain" />
+            <div className="ml-3 mr-0.5 h-3.5 flex-1 overflow-hidden rounded-full bg-night">
+              <div className="h-full rounded-full bg-gradient-to-b from-sky to-grape transition-[width] duration-300" style={{ width: `${pct}%` }} />
             </div>
-            <span className="text-[10px] font-semibold leading-none tabular-nums text-cream/80">{s.spins}/{MAX_SPINS}</span>
+            <span className="absolute inset-0 grid place-items-center pl-2 font-display text-[12px] leading-none text-cream text-outline">{s.spins}/{MAX_SPINS}</span>
           </div>
         </div>
-        <NavItem icon={Gem} label="NFT" to="/nft" />
-        <NavItem icon={Disc3} label="WHEEL" to="/wheel" />
+        <NavItem icon={nftIcon} label="NFT" to="/nft" divider="l" />
+        <NavItem icon={ART.wheel} label="WHEEL" to="/wheel" dot={s.tickets > 0} divider="l" />
       </div>
     </nav>
   );

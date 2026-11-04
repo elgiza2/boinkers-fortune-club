@@ -85,30 +85,33 @@ function Home() {
 
   const spinBtn = (
     <div className="relative h-full w-full">
+      {/* dark ring behind the diamond */}
+      <div className="absolute inset-[6px] rotate-45 rounded-[30px] border-[3px] border-ink bg-night" />
       <button
         onClick={() => { if (auto) setAuto(false); else spin(); }}
         onPointerDown={() => { holdT.current = setTimeout(() => { setAuto(true); toast("Autospin ON — tap to stop"); }, 700); }}
         onPointerUp={() => clearTimeout(holdT.current)} onPointerLeave={() => clearTimeout(holdT.current)}
         aria-label="Spin"
-        className={`absolute inset-0 grid place-items-center rounded-[26px] border border-cream/25 transition-transform active:scale-95 ${auto ? "bg-gradient-to-b from-berry to-berry" : "bg-gradient-to-b from-sun to-sun-dark"}`}
-        style={{ boxShadow: "0 18px 34px -14px oklch(0 0 0 / .85), inset 0 1px 0 oklch(1 0 0 / .6)" }}
+        className="group absolute inset-[13px] transition-transform active:scale-95"
       >
-        <span className="flex flex-col items-center">
-          <span className="font-display text-[26px] leading-none text-ink">{auto ? "STOP" : "SPIN"}</span>
-          <span className="mt-1 text-[7.5px] font-semibold uppercase leading-none tracking-[0.14em] text-ink/70">hold autospin</span>
+        <span
+          className={`absolute inset-0 rotate-45 rounded-[24px] border-[3px] border-ink ${auto ? "bg-berry" : "bg-gradient-to-b from-sun to-sun-dark"}`}
+          style={{ boxShadow: "inset 0 -7px 0 oklch(0 0 0 / .18), inset 0 5px 0 oklch(1 0 0 / .55), 0 4px 0 var(--ink)" }}
+        />
+        <span className="relative flex h-full flex-col items-center justify-center">
+          <span className="font-display text-[30px] leading-none text-cream text-outline">{auto ? "STOP" : "SPIN"}</span>
+          <span className="mt-1 font-display text-[8px] leading-tight text-ink/60">HOLD FOR<br />AUTOSPIN</span>
         </span>
       </button>
       <button
         onClick={() => setBet((b) => BETS[(BETS.indexOf(b) + 1) % BETS.length]!)}
         aria-label="Change bet"
-        className="absolute -right-2.5 -top-1.5 grid h-8 min-w-8 place-items-center rounded-full border border-cream/25 bg-ink/75 px-1.5 backdrop-blur-xl transition-transform active:scale-90"
-        style={{ boxShadow: "0 10px 20px -8px oklch(0 0 0 / .9), inset 0 1px 0 oklch(1 0 0 / .2)" }}
+        className="absolute -right-5 top-0 grid h-11 w-11 rotate-45 place-items-center rounded-[11px] border-[3px] border-ink bg-gradient-to-b from-sun to-sun-dark transition-transform active:scale-90"
+        style={{ boxShadow: "inset 0 -4px 0 oklch(0 0 0 / .18), inset 0 3px 0 oklch(1 0 0 / .5), 0 3px 0 var(--ink)" }}
       >
-        <span className="text-[11px] font-bold leading-none tabular-nums text-sun">x{bet}</span>
+        <span className="-rotate-45 font-display text-base leading-none text-cream text-outline">x{bet}</span>
       </button>
     </div>
-
-
   );
 
   return (
