@@ -91,45 +91,41 @@ function Home() {
 
   return (
     <Screen bare scroll={false} center={spinBtn}>
-      <div className="flex h-full flex-col items-center justify-center px-5 pb-14">
-        <div className={`relative w-full max-w-[340px] ${shake ? "animate-shake" : ""}`}>
-          {/* truss behind */}
-          <div className="absolute -inset-x-3 top-14 bottom-2 rounded-xl border-[3px] border-ink bg-[repeating-linear-gradient(45deg,var(--muted)_0_5px,transparent_5px_16px)] opacity-80" />
-
-          {/* marquee screen */}
-          <div className="relative mx-auto w-[78%] rounded-t-[1.4rem] border-[3px] border-b-0 border-ink bg-muted px-2 pt-1">
-            <div className="text-center font-display text-xl tracking-wide text-sun text-outline">SOLO SLOTS</div>
-            <div className="mt-0.5 flex h-14 items-center justify-center gap-2 rounded-t-xl border-[3px] border-b-0 border-ink bg-ink">
-              {win ? <span key={win} className="animate-pop px-1 text-center font-display text-sm text-sun">{win}</span> : (
+      <div className="flex h-full flex-col items-center justify-center px-3 pb-14 pt-2">
+        <div className={`w-full max-w-[360px] ${shake ? "animate-shake" : ""}`}>
+          <div className="rounded-[32px] border border-cream/20 bg-cream/10 p-3 shadow-[0_20px_50px_-12px_oklch(0_0_0/.6),inset_0_1px_0_oklch(1_0_0/.25)] backdrop-blur-2xl">
+            {/* status / winner */}
+            <div className="flex h-14 items-center gap-3 rounded-[20px] bg-ink/40 px-3">
+              {win ? <span key={win} className="animate-pop w-full text-center text-base font-semibold text-sun">{win}</span> : (
                 <>
-                  <span className="grid h-9 w-9 place-items-center rounded-full border-2 border-muted-foreground bg-night"><Skull className="h-5 w-5 text-cream" /></span>
-                  <div className="leading-tight"><div className="font-display text-sm text-cream">CozyInk5</div><div className="font-display text-sm text-sun">2M</div></div>
+                  <span className="grid h-9 w-9 place-items-center rounded-full bg-cream/15"><Skull className="h-5 w-5 text-cream" /></span>
+                  <div className="leading-tight">
+                    <div className="text-[11px] font-medium uppercase tracking-wider text-cream/60">Top winner</div>
+                    <div className="text-sm font-semibold text-cream">CozyInk5 <span className="text-sun">· 2M</span></div>
+                  </div>
+                  <span className="ml-auto rounded-full bg-cream/15 px-2.5 py-1 text-xs font-semibold text-cream">Bet x{bet}</span>
                 </>
               )}
             </div>
-          </div>
 
-          {/* cabinet */}
-          <div className="relative rounded-2xl border-[3px] border-ink bg-grape p-2 shadow-[0_0_0_3px_var(--berry)]">
-            <div className="mb-2 h-5 rounded-full border-[3px] border-ink bg-ink/40" />
-            <div className="grid grid-cols-3 gap-1.5 rounded-2xl border-[3px] border-ink bg-sky p-1.5 shadow-[0_0_14px_var(--lime)]">
+            {/* reels */}
+            <div className="mt-3 grid grid-cols-3 gap-2">
               {reels.map((sym, i) => (
-                <div key={i} className="relative h-40 overflow-hidden rounded-lg border-[3px] border-ink bg-cream shadow-[inset_0_12px_10px_-6px_oklch(0_0_0/.35),inset_0_-12px_10px_-6px_oklch(0_0_0/.35)]">
+                <div key={i} className="relative h-44 overflow-hidden rounded-[22px] bg-cream shadow-[inset_0_14px_14px_-10px_oklch(0_0_0/.3),inset_0_-14px_14px_-10px_oklch(0_0_0/.3)]">
                   {spinning[i] ? (
                     <div className="animate-reel flex flex-col items-center blur-[1px]">
-                      {[...SYMBOLS, ...SYMBOLS, ...SYMBOLS].map((x, k) => <SymImg key={k} sym={x} className="h-12 w-12 my-1" />)}
+                      {[...SYMBOLS, ...SYMBOLS, ...SYMBOLS].map((x, k) => <SymImg key={k} sym={x} className="my-1 h-12 w-12" />)}
                     </div>
                   ) : (
                     <div key={sym + i + s.spins} className="animate-thud flex h-full flex-col items-center justify-between">
-                      <SymImg sym={at(sym, 1)} className="-mt-7 h-14 w-14 opacity-90" />
-                      <SymImg sym={sym} className="h-[68px] w-[68px] drop-shadow-[0_3px_0_var(--ink)]" />
-                      <SymImg sym={at(sym, 2)} className="-mb-7 h-14 w-14 opacity-90" />
+                      <SymImg sym={at(sym, 1)} className="-mt-7 h-14 w-14 opacity-40" />
+                      <SymImg sym={sym} className="h-[70px] w-[70px] drop-shadow-[0_6px_8px_oklch(0_0_0/.25)]" />
+                      <SymImg sym={at(sym, 2)} className="-mb-7 h-14 w-14 opacity-40" />
                     </div>
                   )}
                 </div>
               ))}
             </div>
-            <div className="mt-2 h-5 rounded-full border-[3px] border-ink bg-ink/40" />
           </div>
         </div>
       </div>
