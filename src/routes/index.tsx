@@ -4,8 +4,8 @@ import { toast } from "sonner";
 import { Crown, Gift, Ticket } from "lucide-react";
 import hero from "@/assets/hero-character.png";
 import { Screen } from "@/components/game/Shell";
-import { SYMBOLS, type Sym, slotPayout, useGame, fmt, beep, haptic, passNeed } from "@/lib/game";
-import { ART, SYM_ART } from "@/lib/art";
+import { SYMBOLS, type Sym, slotPayout, useGame, fmt, beep, haptic, passNeed, currentEvent, evNeed, evReward, clock } from "@/lib/game";
+import { ART, SYM_ART, TOKEN_ART } from "@/lib/art";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -26,11 +26,16 @@ const at = (sym: Sym, d: number) => SYMBOLS[(SYMBOLS.indexOf(sym) + d) % SYMBOLS
 const BETS = [1, 3, 5, 10];
 
 function SymImg({ sym, className }: { sym: Sym; className: string }) {
-  return <img src={SYM_ART[sym]} alt={sym} draggable={false} className={`object-contain ${className}`} />;
+  const src = sym === "token" ? TOKEN_ART[currentEvent(Date.now()).key]! : SYM_ART[sym];
+  return <img src={src} alt={sym} draggable={false} className={`object-contain ${className}`} />;
 }
 
 function Home() {
-  const { s, spend, grant, gainPass } = useGame();
+  const { s, spend, grant, gainPass, gainEvent } = useGame();
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => { const t = setInterval(() => setNow(Date.now()), 1000); return () => clearInterval(t); }, []);
+  const ev = currentEvent(now);
+  const evTok = s.eventId === ev.id ? s.evTokens : 0, evTier = s.eventId === ev.id ? s.evTier : 0;
   const [reels, setReels] = useState<Sym[]>(["bolt", "coin", "chest"]);
   const [spinning, setSpinning] = useState([false, false, false]);
   const [bet, setBet] = useState(1);
@@ -61,7 +66,9 @@ function Home() {
       beep(s.sound, 300 + i * 120);
       if (i === 2) {
         const p = slotPayout(result, bet);
-        grant(p);
+        const hits = result.filter((x) => x === "token").length * bet;
+        if (hits) p.coins += gainEvent(hits);
+        grant({ ...p, tokens: 0 });
         if (p.coins || p.spins || p.tickets) {
           setShake(true); setTimeout(() => setShake(false), 650);
           beep(s.sound, 900, 0.25);
@@ -126,6 +133,25 @@ function Home() {
                   <span className="ml-auto rounded-full bg-cream/15 px-2.5 py-1 text-xs font-semibold text-cream">Good luck!</span>
                 </>
               )}
+            </div>
+
+            {/* 48h event token track */}
+            <div className="mt-3 flex items-center gap-2 px-1">
+              <img src={TOKEN_ART[ev.key]} alt="" className="h-9 w-9 shrink-0 object-contain drop-shadow-[0_3px_0_var(--ink)]" />
+              <div className="min-w-0 flex-1">
+                <div className="mb-1 flex items-baseline justify-between">
+                  <span className="truncate font-display text-[11px] leading-none text-cream">{ev.name.toUpperCase()}</span>
+                  <span className="font-display text-[10px] leading-none text-cream/60">{clock(ev.endsIn)}</span>
+                </div>
+                <div className="relative h-4 overflow-hidden rounded-full border-2 border-ink bg-ink/70">
+                  <div className="h-full rounded-full bg-gradient-to-r from-berry to-sun transition-[width] duration-500" style={{ width: `${Math.max(4, (evTok / evNeed(evTier)) * 100)}%` }} />
+                  <span className="absolute inset-0 grid place-items-center font-display text-[10px] leading-none text-cream text-outline">{evTok}/{evNeed(evTier)}</span>
+                </div>
+              </div>
+              <span className="relative shrink-0">
+                <img src={ART.coin} alt="" className="h-9 w-9 object-contain" />
+                <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 whitespace-nowrap font-display text-[10px] leading-none text-cream text-outline">{fmt(evReward(evTier))}</span>
+              </span>
             </div>
 
             {/* reels */}
