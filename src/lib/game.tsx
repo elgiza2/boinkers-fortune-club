@@ -41,7 +41,7 @@ export function upgradeCost(level: number, tier: number) {
 }
 /** Payout for a slot result, scaled by bet multiplier. */
 export function slotPayout(r: Sym[], bet: number) {
-  const [a, b, c] = r;
+  const [a, b, c] = r as [Sym, Sym, Sym];
   const out = { coins: 0, spins: 0, tickets: 0, tokens: 1 * bet };
   if (a === b && b === c) {
     const map: Record<Sym, Partial<typeof out>> = {

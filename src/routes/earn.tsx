@@ -137,7 +137,7 @@ function Shop() {
           <div className="text-xs">{p.desc}</div>
           <button onClick={() => {
             const ok = p.solo ? s.solo >= p.cost : spend({ coins: p.cost });
-            if (!ok) return toast.error("Not enough balance");
+            if (!ok) { toast.error("Not enough balance"); return; }
             if (p.solo) grant({ solo: -p.cost });
             grant(p.give); toast.success(`${p.name} bought!`);
           }} className="chunk-btn mt-2 w-full bg-lime py-1.5 text-sm">{p.solo ? "⭐" : "🪙"} {fmt(p.cost)}</button>
