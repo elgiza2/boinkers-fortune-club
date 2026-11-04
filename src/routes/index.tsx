@@ -95,7 +95,7 @@ function Home() {
       >
         <span className="flex flex-col items-center">
           <span className="font-display text-[26px] leading-none text-ink">{auto ? "STOP" : "SPIN"}</span>
-          <span className="mt-1 text-[7.5px] font-semibold uppercase leading-none tracking-[0.14em] text-ink/50">hold autospin</span>
+          <span className="mt-1 text-[7.5px] font-semibold uppercase leading-none tracking-[0.14em] text-ink/70">hold autospin</span>
         </span>
       </button>
       <button
