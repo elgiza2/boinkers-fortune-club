@@ -39,49 +39,66 @@ function Pill({ icon, value }: { icon: string; value: string }) {
 }
 
 type To = "/" | "/upgrade" | "/earn" | "/nft" | "/wheel";
-function NavItem({ icon, label, to, dot, divider }: { icon: string; label: string; to: To; dot?: boolean; divider?: "l" | "r" }) {
+
+function NavItem({ icon, label, to }: { icon: string; label: string; to: To }) {
   return (
-    <Link
-      to={to}
-      activeOptions={{ exact: true }}
-      className={`group flex flex-col items-center justify-center gap-1 border-ink/60 ${divider === "r" ? "border-r-2" : divider === "l" ? "border-l-2" : ""}`}
-    >
-      <span className="relative">
-        <img src={icon} alt="" className="h-10 w-10 object-contain transition-transform group-active:scale-90 group-data-[status=active]:scale-110" />
-        {dot && <span className="absolute -right-0.5 -top-0.5 h-3.5 w-3.5 rounded-full border-2 border-ink bg-berry" />}
-      </span>
-      <span className="font-display text-[11px] leading-none text-muted-foreground group-data-[status=active]:text-sun">{label}</span>
+    <Link to={to} activeOptions={{ exact: true }} className="group flex flex-col items-center justify-center gap-1.5">
+      {({ isActive }) => (
+        <>
+          <span
+            className={`grid h-9 w-9 place-items-center rounded-[13px] transition-all duration-300 ${
+              isActive ? "bg-cream/15 shadow-[inset_0_1px_0_oklch(1_0_0/.18)]" : ""
+            }`}
+          >
+            <img
+              src={icon}
+              alt=""
+              className={`h-6 w-6 object-contain transition-all duration-300 group-active:scale-90 ${isActive ? "" : "opacity-45 saturate-[.6]"}`}
+            />
+          </span>
+          <span
+            className={`font-sans text-[10px] font-medium leading-none tracking-wide transition-colors duration-300 ${
+              isActive ? "text-cream" : "text-cream/40"
+            }`}
+          >
+            {label}
+          </span>
+        </>
+      )}
     </Link>
   );
 }
 
-/** Bottom bar: big diamond SPIN rises out of the middle, spins meter sits under it inside the bar. */
+/** Frosted-glass iOS tab bar: hairline edges, no dots, SPIN rises out of the middle, spins meter under it. */
 export function BottomNav({ center }: { center?: ReactNode }) {
   const { s } = useGame();
   const pct = Math.min(100, (s.spins / MAX_SPINS) * 100);
   return (
-    <nav className="relative z-30 shrink-0 pb-[env(safe-area-inset-bottom)]">
-      <div className="relative grid h-[78px] grid-cols-[1fr_1fr_1.9fr_1fr_1fr] border-t-[3px] border-ink bg-night">
-        <NavItem icon={ART.rocket} label="UPGRADE" to="/upgrade" dot divider="r" />
-        <NavItem icon={ART.bag} label="EARN" to="/earn" divider="r" />
+    <nav className="relative z-30 shrink-0 px-2 pb-[max(8px,env(safe-area-inset-bottom))] pt-1">
+      <div className="relative grid h-[74px] grid-cols-[1fr_1fr_1.9fr_1fr_1fr] rounded-[26px] border border-cream/12 bg-ink/45 shadow-[0_14px_34px_-12px_oklch(0_0_0/.85),inset_0_1px_0_oklch(1_0_0/.14)] backdrop-blur-2xl">
+        <NavItem icon={ART.rocket} label="UPGRADE" to="/upgrade" />
+        <NavItem icon={ART.bag} label="EARN" to="/earn" />
         <div className="relative">
-          <div className="absolute left-1/2 top-[-58px] h-[112px] w-[112px] -translate-x-1/2">
+          <div className="absolute left-1/2 top-[-52px] h-[104px] w-[104px] -translate-x-1/2">
             {center ?? (
-              <Link to="/" className="chunk-btn h-full w-full rounded-[2rem] bg-sun">
-                <span className="font-display text-2xl leading-none">SPIN</span>
+              <Link
+                to="/"
+                className="grid h-full w-full place-items-center rounded-[30px] border border-cream/20 bg-gradient-to-b from-sun to-sun-dark shadow-[0_12px_26px_-8px_oklch(0_0_0/.7),inset_0_1px_0_oklch(1_0_0/.5)] transition-transform active:scale-95"
+              >
+                <span className="font-display text-xl leading-none text-ink">SPIN</span>
               </Link>
             )}
           </div>
-          <div className="absolute inset-x-2 bottom-2.5 flex h-[22px] items-center rounded-full border-[3px] border-ink bg-ink">
-            <img src={ART.bolt} alt="" className="absolute -left-2.5 h-7 w-7 object-contain" />
-            <div className="ml-3 mr-0.5 h-3.5 flex-1 overflow-hidden rounded-full bg-night">
-              <div className="h-full rounded-full bg-gradient-to-b from-sky to-grape transition-[width] duration-300" style={{ width: `${pct}%` }} />
+          <div className="absolute inset-x-2.5 bottom-2 flex h-[18px] items-center rounded-full bg-cream/10 pl-1 pr-2">
+            <img src={ART.bolt} alt="" className="h-4 w-4 shrink-0 object-contain" />
+            <div className="ml-1.5 h-[5px] flex-1 overflow-hidden rounded-full bg-ink/60">
+              <div className="h-full rounded-full bg-gradient-to-r from-sun to-sun-dark transition-[width] duration-300" style={{ width: `${pct}%` }} />
             </div>
-            <span className="absolute inset-0 grid place-items-center pl-2 font-display text-[12px] leading-none text-cream text-outline">{s.spins}/{MAX_SPINS}</span>
+            <span className="ml-2 font-sans text-[10px] font-semibold leading-none tabular-nums text-cream/75">{s.spins}/{MAX_SPINS}</span>
           </div>
         </div>
-        <NavItem icon={nftIcon} label="NFT" to="/nft" divider="l" />
-        <NavItem icon={ART.wheel} label="WHEEL" to="/wheel" dot={s.tickets > 0} divider="l" />
+        <NavItem icon={nftIcon} label="NFT" to="/nft" />
+        <NavItem icon={ART.wheel} label="WHEEL" to="/wheel" />
       </div>
     </nav>
   );
