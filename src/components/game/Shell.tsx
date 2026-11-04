@@ -5,6 +5,7 @@ import hero from "@/assets/hero-character.png";
 import sky from "@/assets/night-sky.jpg";
 import { fmt, useGame, MAX_SPINS } from "@/lib/game";
 import { ART } from "@/lib/art";
+import nftIcon from "@/assets/nav-nft.png";
 
 export function TopBar() {
   const { s, toggleSound } = useGame();
@@ -37,49 +38,50 @@ function Pill({ icon, value }: { icon: string; value: string }) {
   );
 }
 
-type To = "/" | "/upgrade" | "/earn" | "/stickers" | "/wheel";
-function NavItem({ icon, label, to, dot }: { icon: string; label: string; to: To; dot?: boolean }) {
+type To = "/" | "/upgrade" | "/earn" | "/nft" | "/wheel";
+function NavItem({ icon, label, to, dot, divider }: { icon: string; label: string; to: To; dot?: boolean; divider?: "l" | "r" }) {
   return (
-    <Link to={to} activeOptions={{ exact: true }} className="group flex flex-col items-center justify-end gap-0.5 pb-2">
+    <Link
+      to={to}
+      activeOptions={{ exact: true }}
+      className={`group flex flex-col items-center justify-center gap-1 border-ink/60 ${divider === "r" ? "border-r-2" : divider === "l" ? "border-l-2" : ""}`}
+    >
       <span className="relative">
-        <img src={icon} alt="" className="h-9 w-9 object-contain transition-transform group-data-[status=active]:scale-110" />
-        {dot && <span className="absolute -right-0.5 top-0 h-3 w-3 rounded-full border-2 border-ink bg-berry" />}
+        <img src={icon} alt="" className="h-10 w-10 object-contain transition-transform group-active:scale-90 group-data-[status=active]:scale-110" />
+        {dot && <span className="absolute -right-0.5 -top-0.5 h-3.5 w-3.5 rounded-full border-2 border-ink bg-berry" />}
       </span>
-      <span className="font-display text-[10px] leading-none text-muted-foreground group-data-[status=active]:text-sun">{label}</span>
+      <span className="font-display text-[11px] leading-none text-muted-foreground group-data-[status=active]:text-sun">{label}</span>
     </Link>
   );
 }
 
-/** Bottom bar: SPIN sits in the raised middle slot, spins meter right under it. */
+/** Bottom bar: big diamond SPIN rises out of the middle, spins meter sits under it inside the bar. */
 export function BottomNav({ center }: { center?: ReactNode }) {
   const { s } = useGame();
   const pct = Math.min(100, (s.spins / MAX_SPINS) * 100);
   return (
     <nav className="relative z-30 shrink-0 pb-[env(safe-area-inset-bottom)]">
-      <div className="relative grid h-[74px] grid-cols-[1fr_1fr_1.7fr_1fr_1fr] border-t-[3px] border-ink bg-night">
-        <NavItem icon={ART.rocket} label="UPGRADE" to="/upgrade" dot />
-        <NavItem icon={ART.bag} label="EARN" to="/earn" />
+      <div className="relative grid h-[78px] grid-cols-[1fr_1fr_1.9fr_1fr_1fr] border-t-[3px] border-ink bg-night">
+        <NavItem icon={ART.rocket} label="UPGRADE" to="/upgrade" dot divider="r" />
+        <NavItem icon={ART.bag} label="EARN" to="/earn" divider="r" />
         <div className="relative">
-          <div className="absolute inset-x-0 -top-12 bottom-0 flex flex-col items-center">
-            <div className="relative grid h-[96px] w-[118px] place-items-center rounded-[2rem] border-[3px] border-ink bg-night p-1.5">
-              {center ?? (
-                <Link to="/" className="chunk-btn h-full w-full rounded-[1.6rem] bg-sun">
-                  <span className="font-display text-2xl leading-none">SPIN</span>
-                </Link>
-              )}
+          <div className="absolute left-1/2 top-[-58px] h-[112px] w-[112px] -translate-x-1/2">
+            {center ?? (
+              <Link to="/" className="chunk-btn h-full w-full rounded-[2rem] bg-sun">
+                <span className="font-display text-2xl leading-none">SPIN</span>
+              </Link>
+            )}
+          </div>
+          <div className="absolute inset-x-2 bottom-2.5 flex h-[22px] items-center rounded-full border-[3px] border-ink bg-ink">
+            <img src={ART.bolt} alt="" className="absolute -left-2.5 h-7 w-7 object-contain" />
+            <div className="ml-3 mr-0.5 h-3.5 flex-1 overflow-hidden rounded-full bg-night">
+              <div className="h-full rounded-full bg-gradient-to-b from-sky to-grape transition-[width] duration-300" style={{ width: `${pct}%` }} />
             </div>
-            {/* spins count — clean pill under the button */}
-            <div className="relative mt-1 flex h-5 w-[104px] items-center rounded-full border-2 border-ink bg-ink">
-              <img src={ART.bolt} alt="" className="absolute -left-2 h-6 w-6 object-contain" />
-              <div className="mx-0.5 h-3 flex-1 overflow-hidden rounded-full bg-night">
-                <div className="h-full rounded-full bg-sky transition-[width] duration-300" style={{ width: `${pct}%` }} />
-              </div>
-              <span className="absolute inset-0 grid place-items-center font-display text-[11px] leading-none text-cream text-outline">{s.spins}/{MAX_SPINS}</span>
-            </div>
+            <span className="absolute inset-0 grid place-items-center pl-2 font-display text-[12px] leading-none text-cream text-outline">{s.spins}/{MAX_SPINS}</span>
           </div>
         </div>
-        <NavItem icon={ART.book} label="STICKERS" to="/stickers" />
-        <NavItem icon={ART.wheel} label="WHEEL" to="/wheel" dot={s.tickets > 0} />
+        <NavItem icon={nftIcon} label="NFT" to="/nft" divider="l" />
+        <NavItem icon={ART.wheel} label="WHEEL" to="/wheel" dot={s.tickets > 0} divider="l" />
       </div>
     </nav>
   );
