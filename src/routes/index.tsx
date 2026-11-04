@@ -5,6 +5,7 @@ import { Skull } from "lucide-react";
 import { Screen } from "@/components/game/Shell";
 import { SYMBOLS, type Sym, slotPayout, useGame, fmt, beep, haptic } from "@/lib/game";
 import { SYM_ART } from "@/lib/art";
+import frame from "@/assets/slot-frame.png";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -91,46 +92,41 @@ function Home() {
 
   return (
     <Screen bare scroll={false} center={spinBtn}>
-      <div className="flex h-full flex-col items-center justify-center px-5 pb-14">
-        <div className={`relative w-full max-w-[340px] ${shake ? "animate-shake" : ""}`}>
-          {/* truss behind */}
-          <div className="absolute -inset-x-3 top-14 bottom-2 rounded-xl border-[3px] border-ink bg-[repeating-linear-gradient(45deg,var(--muted)_0_5px,transparent_5px_16px)] opacity-80" />
+      <div className="flex h-full flex-col items-center justify-center px-3 pb-14 pt-2">
+        <div className={`relative aspect-[3/4] h-full max-h-[460px] max-w-full ${shake ? "animate-shake" : ""}`}>
+          <img src={frame} alt="" draggable={false} className="pointer-events-none absolute inset-0 h-full w-full select-none" />
 
           {/* marquee screen */}
-          <div className="relative mx-auto w-[78%] rounded-t-[1.4rem] border-[3px] border-b-0 border-ink bg-muted px-2 pt-1">
-            <div className="text-center font-display text-xl tracking-wide text-sun text-outline">SOLO SLOTS</div>
-            <div className="mt-0.5 flex h-14 items-center justify-center gap-2 rounded-t-xl border-[3px] border-b-0 border-ink bg-ink">
-              {win ? <span key={win} className="animate-pop px-1 text-center font-display text-sm text-sun">{win}</span> : (
-                <>
-                  <span className="grid h-9 w-9 place-items-center rounded-full border-2 border-muted-foreground bg-night"><Skull className="h-5 w-5 text-cream" /></span>
-                  <div className="leading-tight"><div className="font-display text-sm text-cream">CozyInk5</div><div className="font-display text-sm text-sun">2M</div></div>
-                </>
-              )}
-            </div>
+          <div className="absolute left-[20%] top-[13%] flex h-[13%] w-[60%] items-center justify-center gap-2">
+            {win ? <span key={win} className="animate-pop px-1 text-center font-display text-sm leading-tight text-sun text-outline">{win}</span> : (
+              <>
+                <span className="grid h-9 w-9 place-items-center rounded-full border-2 border-muted-foreground bg-night"><Skull className="h-5 w-5 text-cream" /></span>
+                <div className="leading-tight"><div className="font-display text-sm text-cream">CozyInk5</div><div className="font-display text-sm text-sun">2M</div></div>
+              </>
+            )}
           </div>
 
-          {/* cabinet */}
-          <div className="relative rounded-2xl border-[3px] border-ink bg-grape p-2 shadow-[0_0_0_3px_var(--berry)]">
-            <div className="mb-2 h-5 rounded-full border-[3px] border-ink bg-ink/40" />
-            <div className="grid grid-cols-3 gap-1.5 rounded-2xl border-[3px] border-ink bg-sky p-1.5 shadow-[0_0_14px_var(--lime)]">
-              {reels.map((sym, i) => (
-                <div key={i} className="relative h-40 overflow-hidden rounded-lg border-[3px] border-ink bg-cream shadow-[inset_0_12px_10px_-6px_oklch(0_0_0/.35),inset_0_-12px_10px_-6px_oklch(0_0_0/.35)]">
-                  {spinning[i] ? (
-                    <div className="animate-reel flex flex-col items-center blur-[1px]">
-                      {[...SYMBOLS, ...SYMBOLS, ...SYMBOLS].map((x, k) => <SymImg key={k} sym={x} className="h-12 w-12 my-1" />)}
-                    </div>
-                  ) : (
-                    <div key={sym + i + s.spins} className="animate-thud flex h-full flex-col items-center justify-between">
-                      <SymImg sym={at(sym, 1)} className="-mt-7 h-14 w-14 opacity-90" />
-                      <SymImg sym={sym} className="h-[68px] w-[68px] drop-shadow-[0_3px_0_var(--ink)]" />
-                      <SymImg sym={at(sym, 2)} className="-mb-7 h-14 w-14 opacity-90" />
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-            <div className="mt-2 h-5 rounded-full border-[3px] border-ink bg-ink/40" />
+          {/* reel window */}
+          <div className="absolute left-[20.5%] top-[31.8%] grid h-[35.4%] w-[59.5%] grid-cols-3 gap-1 p-1">
+            {reels.map((sym, i) => (
+              <div key={i} className="relative h-full overflow-hidden rounded-md bg-cream shadow-[inset_0_12px_10px_-6px_oklch(0_0_0/.4),inset_0_-12px_10px_-6px_oklch(0_0_0/.4)]">
+                {spinning[i] ? (
+                  <div className="animate-reel flex flex-col items-center blur-[1px]">
+                    {[...SYMBOLS, ...SYMBOLS, ...SYMBOLS].map((x, k) => <SymImg key={k} sym={x} className="my-1 h-11 w-11" />)}
+                  </div>
+                ) : (
+                  <div key={sym + i + s.spins} className="animate-thud flex h-full flex-col items-center justify-between">
+                    <SymImg sym={at(sym, 1)} className="-mt-6 h-12 w-12 opacity-90" />
+                    <SymImg sym={sym} className="h-[58px] w-[58px] drop-shadow-[0_3px_0_var(--ink)]" />
+                    <SymImg sym={at(sym, 2)} className="-mb-6 h-12 w-12 opacity-90" />
+                  </div>
+                )}
+              </div>
+            ))}
           </div>
+
+          {/* base panel: bet */}
+          <div className="absolute left-[24%] top-[80.5%] flex h-[8.5%] w-[52%] items-center justify-center font-display text-lg text-sun text-outline">BET x{bet}</div>
         </div>
       </div>
     </Screen>
