@@ -1,4 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from "react";
+import { bankProduction, buyCharacter, mergeRate, moveCharacter, starterBoard, type Board } from "./merge";
+import { supabase } from "@/integrations/supabase/client";
+import type { Json } from "@/integrations/supabase/types";
 
 export const MAX_SPINS = 50;
 export const SPIN_REGEN_MS = 60_000; // 1 spin / minute
@@ -27,6 +30,9 @@ export interface GameState {
   eventId: number;
   evTokens: number;
   evTier: number;
+  mergeBoard: Board;
+  mergeBest: number;
+  soloBank: number;
 }
 
 const initial = (): GameState => ({
@@ -36,10 +42,12 @@ const initial = (): GameState => ({
   tasksDone: [], claimedMilestones: [], sound: true,
   passXp: 0, passLevel: 1, premium: false,
   eventId: -1, evTokens: 0, evTier: 0,
+  mergeBoard: starterBoard(), mergeBest: 1, soloBank: 0,
 });
 
 /** Solo per hour grows with character upgrades and level. */
-export function soloRate(s: Pick<GameState, "parts" | "level">) {
+export function soloRate(s: Pick<GameState, "parts" | "level"> & Partial<Pick<GameState, "mergeBoard">>) {
+  if (s.mergeBoard) return mergeRate(s.mergeBoard);
   const total = s.parts.head + s.parts.body + s.parts.gear;
   return Math.round(100 * (1 + total * 0.5) * (1 + (s.level - 1) * 0.25));
 }
@@ -128,6 +136,10 @@ interface Ctx {
   toggleSound: () => void;
   gainPass: (spinsUsed: number) => number;
   gainEvent: (tokens: number) => number;
+  buyMerge: () => void;
+  moveMerge: (from: number, to: number) => void;
+  cloudUser: boolean;
+  cloudStatus: "local" | "loading" | "saving" | "saved" | "error";
 }
 const GameCtx = createContext<Ctx | null>(null);
 const KEY = "solo-slots-v1";
@@ -137,6 +149,11 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const [ready, setReady] = useState(false);
   const [now, setNow] = useState(() => Date.now());
   const loaded = useRef(false);
+  const latest = useRef(s);
+  latest.current = s;
+  const [cloudId, setCloudId] = useState<string | null>(null);
+  const [cloudStatus, setCloudStatus] = useState<Ctx["cloudStatus"]>("local");
+  const [cloudLoaded, setCloudLoaded] = useState(false);
 
   useEffect(() => {
     try {
@@ -149,6 +166,44 @@ export function GameProvider({ children }: { children: ReactNode }) {
   }, []);
   useEffect(() => { if (loaded.current) localStorage.setItem(KEY, JSON.stringify(s)); }, [s]);
 
+  useEffect(() => {
+    let active = true;
+    let generation = 0;
+    const sync = async (userId: string | null) => {
+      const current = ++generation;
+      setCloudLoaded(false); setCloudId(userId);
+      if (!userId) { setCloudStatus("local"); return; }
+      setCloudStatus("loading");
+      const { data, error } = await supabase.from("game_saves").select("state").eq("user_id", userId).maybeSingle();
+      if (!active || current !== generation) return;
+      if (error) { setCloudStatus("error"); return; }
+      if (data?.state && typeof data.state === "object" && !Array.isArray(data.state)) {
+        const saved = data.state as unknown as Partial<GameState>;
+        if (Array.isArray(saved.mergeBoard) && saved.mergeBoard.length === 12 && saved.mergeBoard.every(v => v === null || (Number.isInteger(v) && v >= 1 && v <= 6))) {
+          setS({ ...initial(), ...saved });
+        }
+      }
+      setCloudLoaded(true); setCloudStatus("saved");
+    };
+    void supabase.auth.getSession().then(({ data }) => sync(data.session?.user.id ?? null));
+    const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "SIGNED_IN" || event === "SIGNED_OUT") void sync(session?.user.id ?? null);
+    });
+    return () => { active = false; listener.subscription.unsubscribe(); };
+  }, []);
+  // Only durable actions change this snapshot; spin regeneration must not postpone saves.
+  const saveSnapshot = JSON.stringify({ ...s, lastSpinRegen: 0 });
+  useEffect(() => {
+    if (!cloudId || !cloudLoaded) return;
+    let active = true;
+    const timer = setTimeout(async () => {
+      setCloudStatus("saving");
+      const { error } = await supabase.from("game_saves").upsert({ user_id: cloudId, state: latest.current as unknown as Json, updated_at: new Date().toISOString() });
+      if (active) setCloudStatus(error ? "error" : "saved");
+    }, 700);
+    return () => { active = false; clearTimeout(timer); };
+  }, [saveSnapshot, cloudId, cloudLoaded]);
+
   // spin regen
   useEffect(() => {
     setS((p) => {
@@ -159,7 +214,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
     });
   }, [now]);
 
-  const pendingSolo = Math.floor(((now - s.lastSoloClaim) / 3_600_000) * soloRate(s));
+  const pendingSolo = Math.floor(bankProduction(s.soloBank, s.lastSoloClaim, now, soloRate(s)));
   const nextSpinIn = s.spins >= MAX_SPINS ? 0 : Math.max(0, SPIN_REGEN_MS - (now - s.lastSpinRegen));
 
   const grant = useCallback((r: Reward) => setS((p) => ({
@@ -186,9 +241,24 @@ export function GameProvider({ children }: { children: ReactNode }) {
   }, [s]);
   const claimSolo = useCallback(() => {
     const amt = pendingSolo;
-    setS((p) => ({ ...p, solo: p.solo + amt, lastSoloClaim: Date.now() }));
+    setS((p) => {
+      const at = Date.now(), total = bankProduction(p.soloBank, p.lastSoloClaim, at, soloRate(p));
+      return { ...p, solo: p.solo + Math.floor(total), soloBank: total % 1, lastSoloClaim: at };
+    });
     return amt;
   }, [pendingSolo]);
+  const buyMerge = useCallback(() => setS(p => {
+    const result = buyCharacter(p.mergeBoard, p.coins);
+    if (!result) return p;
+    const at = Date.now();
+    return { ...p, coins: result.coins, mergeBoard: result.board, soloBank: bankProduction(p.soloBank, p.lastSoloClaim, at, soloRate(p)), lastSoloClaim: at };
+  }), []);
+  const moveMerge = useCallback((from: number, to: number) => setS(p => {
+    const result = moveCharacter(p.mergeBoard, from, to);
+    if (!result) return p;
+    const at = Date.now();
+    return { ...p, mergeBoard: result.board, mergeBest: Math.max(p.mergeBest, result.level), soloBank: bankProduction(p.soloBank, p.lastSoloClaim, at, soloRate(p)), lastSoloClaim: at };
+  }), []);
   const upgrade = useCallback((part: Part) => {
     const tier = s.parts[part];
     const cost = upgradeCost(s.level, tier);
@@ -220,7 +290,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
   }, []);
   const toggleSound = useCallback(() => setS((p) => ({ ...p, sound: !p.sound })), []);
 
-  return <GameCtx.Provider value={{ s, ready, pendingSolo, nextSpinIn, grant, spend, claimSolo, upgrade, completeTask, claimMilestone, toggleSound, gainPass, gainEvent }}>{children}</GameCtx.Provider>;
+  return <GameCtx.Provider value={{ s, ready, pendingSolo, nextSpinIn, grant, spend, claimSolo, upgrade, completeTask, claimMilestone, toggleSound, gainPass, gainEvent, buyMerge, moveMerge, cloudUser: Boolean(cloudId), cloudStatus }}>{children}</GameCtx.Provider>;
 }
 
 export function useGame() {
