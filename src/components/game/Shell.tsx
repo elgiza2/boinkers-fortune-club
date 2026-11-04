@@ -79,7 +79,7 @@ export function BottomNav({ center }: { center?: ReactNode }) {
         <NavItem icon={ART.rocket} label="UPGRADE" to="/upgrade" />
         <NavItem icon={ART.bag} label="EARN" to="/earn" />
         <div className="relative">
-          <div className="absolute left-1/2 top-[-52px] h-[104px] w-[104px] -translate-x-1/2">
+          <div className="absolute left-1/2 top-[-62px] h-[104px] w-[104px] -translate-x-1/2">
             {center ?? (
               <Link
                 to="/"
