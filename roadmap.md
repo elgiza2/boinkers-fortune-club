@@ -1,4 +1,6 @@
 # Roadmap
+- [ ] Standalone wheel without bottom navigation and reference-sized wheel with its own spin button
+- [ ] Complete NFT gallery with more than 50 distinct mascot artworks, filtering and details
 - [x] Enlarge wheel and cropped prize artwork, separate amounts and remove duplicated spin control
 - [x] Increase wheel prizes and refine reference proportions, segments, mascot and stand
 - [x] Remove upgrade title and restyle WHEEL from reference without side extras or bottom event row
