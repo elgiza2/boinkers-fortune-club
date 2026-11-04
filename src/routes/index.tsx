@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import { Skull } from "lucide-react";
+import { Crown, Skull, Ticket } from "lucide-react";
 import { Screen } from "@/components/game/Shell";
 import { SYMBOLS, type Sym, slotPayout, useGame, fmt, beep, haptic, passNeed } from "@/lib/game";
 import { SYM_ART } from "@/lib/art";
@@ -129,13 +129,19 @@ function Home() {
               ))}
             </div>
             {/* spin pass */}
-            <div className="mt-3 flex items-center gap-2 rounded-full bg-ink/40 p-1.5">
-              <span className={`rounded-full px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide ${s.premium ? "bg-sun text-ink" : "bg-sky text-cream"}`}>{s.premium ? "Premium" : "Free"}</span>
-              <div className="relative h-6 flex-1 overflow-hidden rounded-full bg-cream/15">
-                <div className="h-full rounded-full bg-lime transition-[width] duration-500" style={{ width: `${Math.min(100, (s.passXp / passNeed(s.passLevel)) * 100)}%` }} />
-                <span className="absolute inset-0 grid place-items-center text-xs font-semibold text-cream">{fmt(s.passXp)}/{fmt(passNeed(s.passLevel))}</span>
+            <div className="mx-auto mt-3 flex w-[88%] items-center">
+              <span className={`relative z-10 -mr-2 flex h-6 -rotate-6 items-center gap-1 rounded-md border-2 border-ink px-1.5 shadow-[0_2px_0_var(--ink)] ${s.premium ? "bg-gradient-to-b from-sun to-sun-dark" : "bg-gradient-to-b from-sky to-grape"}`}>
+                {s.premium ? <Crown className="h-3 w-3 text-ink" strokeWidth={3} /> : <Ticket className="h-3 w-3 text-cream" strokeWidth={3} />}
+                <span className={`font-display text-[10px] leading-none tracking-wider ${s.premium ? "text-ink" : "text-cream"}`}>{s.premium ? "PREMIUM" : "FREE"}</span>
+              </span>
+              <div className="relative h-4 flex-1 overflow-hidden rounded-full border-2 border-ink bg-ink/70">
+                <div className="h-full rounded-full bg-gradient-to-r from-lime to-sky transition-[width] duration-500" style={{ width: `${Math.max(4, Math.min(100, (s.passXp / passNeed(s.passLevel)) * 100))}%` }} />
+                <div className="absolute inset-x-1 top-0.5 h-1 rounded-full bg-cream/30" />
+                <span className="absolute inset-0 grid place-items-center font-display text-[10px] leading-none text-cream text-outline">{fmt(s.passXp)}/{fmt(passNeed(s.passLevel))}</span>
               </div>
-              <span className="grid h-8 min-w-8 place-items-center rounded-full bg-sun px-1.5 text-sm font-bold text-ink">{s.passLevel}</span>
+              <span className="relative z-10 -ml-2 grid h-8 w-8 rotate-45 place-items-center rounded-[9px] border-2 border-ink bg-gradient-to-br from-sun to-sun-dark shadow-[0_2px_0_var(--ink),inset_0_2px_0_oklch(1_0_0/.5)]">
+                <span className="-rotate-45 font-display text-sm leading-none text-cream text-outline">{s.passLevel}</span>
+              </span>
             </div>
           </div>
         </div>
