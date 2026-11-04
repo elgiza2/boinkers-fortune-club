@@ -5,7 +5,6 @@ import { Skull } from "lucide-react";
 import { Screen } from "@/components/game/Shell";
 import { SYMBOLS, type Sym, slotPayout, useGame, fmt, beep, haptic } from "@/lib/game";
 import { SYM_ART } from "@/lib/art";
-import frame from "@/assets/slot-frame.png";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -93,40 +92,41 @@ function Home() {
   return (
     <Screen bare scroll={false} center={spinBtn}>
       <div className="flex h-full flex-col items-center justify-center px-3 pb-14 pt-2">
-        <div className={`relative aspect-[3/4] h-full max-h-[460px] max-w-full ${shake ? "animate-shake" : ""}`}>
-          <img src={frame} alt="" draggable={false} className="pointer-events-none absolute inset-0 h-full w-full select-none" />
-
-          {/* marquee screen */}
-          <div className="absolute left-[20%] top-[13%] flex h-[13%] w-[60%] items-center justify-center gap-2">
-            {win ? <span key={win} className="animate-pop px-1 text-center font-display text-sm leading-tight text-sun text-outline">{win}</span> : (
-              <>
-                <span className="grid h-9 w-9 place-items-center rounded-full border-2 border-muted-foreground bg-night"><Skull className="h-5 w-5 text-cream" /></span>
-                <div className="leading-tight"><div className="font-display text-sm text-cream">CozyInk5</div><div className="font-display text-sm text-sun">2M</div></div>
-              </>
-            )}
-          </div>
-
-          {/* reel window */}
-          <div className="absolute left-[20.5%] top-[31.8%] grid h-[35.4%] w-[59.5%] grid-cols-3 gap-1 p-1">
-            {reels.map((sym, i) => (
-              <div key={i} className="relative h-full overflow-hidden rounded-md bg-cream shadow-[inset_0_12px_10px_-6px_oklch(0_0_0/.4),inset_0_-12px_10px_-6px_oklch(0_0_0/.4)]">
-                {spinning[i] ? (
-                  <div className="animate-reel flex flex-col items-center blur-[1px]">
-                    {[...SYMBOLS, ...SYMBOLS, ...SYMBOLS].map((x, k) => <SymImg key={k} sym={x} className="my-1 h-11 w-11" />)}
+        <div className={`w-full max-w-[360px] ${shake ? "animate-shake" : ""}`}>
+          <div className="rounded-[32px] border border-cream/20 bg-cream/10 p-3 shadow-[0_20px_50px_-12px_oklch(0_0_0/.6),inset_0_1px_0_oklch(1_0_0/.25)] backdrop-blur-2xl">
+            {/* status / winner */}
+            <div className="flex h-14 items-center gap-3 rounded-[20px] bg-ink/40 px-3">
+              {win ? <span key={win} className="animate-pop w-full text-center text-base font-semibold text-sun">{win}</span> : (
+                <>
+                  <span className="grid h-9 w-9 place-items-center rounded-full bg-cream/15"><Skull className="h-5 w-5 text-cream" /></span>
+                  <div className="leading-tight">
+                    <div className="text-[11px] font-medium uppercase tracking-wider text-cream/60">Top winner</div>
+                    <div className="text-sm font-semibold text-cream">CozyInk5 <span className="text-sun">· 2M</span></div>
                   </div>
-                ) : (
-                  <div key={sym + i + s.spins} className="animate-thud flex h-full flex-col items-center justify-between">
-                    <SymImg sym={at(sym, 1)} className="-mt-6 h-12 w-12 opacity-90" />
-                    <SymImg sym={sym} className="h-[58px] w-[58px] drop-shadow-[0_3px_0_var(--ink)]" />
-                    <SymImg sym={at(sym, 2)} className="-mb-6 h-12 w-12 opacity-90" />
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
+                  <span className="ml-auto rounded-full bg-cream/15 px-2.5 py-1 text-xs font-semibold text-cream">Bet x{bet}</span>
+                </>
+              )}
+            </div>
 
-          {/* base panel: bet */}
-          <div className="absolute left-[24%] top-[80.5%] flex h-[8.5%] w-[52%] items-center justify-center font-display text-lg text-sun text-outline">BET x{bet}</div>
+            {/* reels */}
+            <div className="mt-3 grid grid-cols-3 gap-2">
+              {reels.map((sym, i) => (
+                <div key={i} className="relative h-44 overflow-hidden rounded-[22px] bg-cream shadow-[inset_0_14px_14px_-10px_oklch(0_0_0/.3),inset_0_-14px_14px_-10px_oklch(0_0_0/.3)]">
+                  {spinning[i] ? (
+                    <div className="animate-reel flex flex-col items-center blur-[1px]">
+                      {[...SYMBOLS, ...SYMBOLS, ...SYMBOLS].map((x, k) => <SymImg key={k} sym={x} className="my-1 h-12 w-12" />)}
+                    </div>
+                  ) : (
+                    <div key={sym + i + s.spins} className="animate-thud flex h-full flex-col items-center justify-between">
+                      <SymImg sym={at(sym, 1)} className="-mt-7 h-14 w-14 opacity-40" />
+                      <SymImg sym={sym} className="h-[70px] w-[70px] drop-shadow-[0_6px_8px_oklch(0_0_0/.25)]" />
+                      <SymImg sym={at(sym, 2)} className="-mb-7 h-14 w-14 opacity-40" />
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     </Screen>
