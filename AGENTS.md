@@ -12,3 +12,4 @@
 - Merge Island rules live in a pure, tested module separate from artwork and the upgrade view, so purchases and merges share one source of truth.
 - Bank elapsed SOLO at the old board rate before board changes; retain fractional production to avoid losing earnings.
 - Game state uses the existing device-local provider until account persistence is requested; connected Cloud resources remain unused.
+- Render drag overlays in a body portal, outside frosted-glass ancestors, so backdrop filters cannot offset drag collision coordinates.
