@@ -15,4 +15,4 @@
 - Render drag overlays in a body portal, outside frosted-glass ancestors, so backdrop filters cannot offset drag collision coordinates.
 - Wheel rewards and landing angles share a pure tested module so displayed segments match awarded prizes.
 - Screen supports opting out of bottom navigation for standalone experiences while preserving shared top balances.
-- NFT artwork catalog is separate from device-local favorites; the gallery does not mint, trade or claim blockchain ownership.
+- NFT sales use browser-only TON Connect loaded on demand; never submit payment without verified NFT sale listings and configured prices, and never treat a transfer as proof of NFT ownership.
