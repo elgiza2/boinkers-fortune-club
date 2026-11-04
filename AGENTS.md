@@ -16,3 +16,4 @@
 - Wheel rewards and landing angles share a pure tested module so displayed segments match awarded prizes.
 - Screen supports opting out of bottom navigation for standalone experiences while preserving shared top balances.
 - NFT sales use browser-only TON Connect loaded on demand; never submit payment without verified NFT sale listings and configured prices, and never treat a transfer as proof of NFT ownership.
+- Shared app surfaces, balances and navigation use Screen and semantic global tokens; page-specific presentation stays separate from game rules to keep redesigns behavior-neutral.

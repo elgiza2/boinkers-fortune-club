@@ -69,7 +69,7 @@
   --wheel-pink: oklch(0.83 0.16 325);
   --wheel-glow: oklch(0.88 0.11 215);
   --wheel-rim-gradient: linear-gradient(135deg, var(--wheel-blue-light), var(--wheel-blue) 45%, var(--wheel-blue-light));
-  --wheel-disc-gradient: conic-gradient(from -15deg, var(--wheel-pink) 0deg 30deg, var(--wheel-paper) 30deg 60deg, var(--wheel-blue-light) 60deg 90deg, var(--wheel-paper) 90deg 120deg, var(--wheel-blue-light) 120deg 150deg, var(--wheel-paper) 150deg 180deg, var(--wheel-blue-light) 180deg 210deg, var(--wheel-paper) 210deg 240deg, var(--wheel-blue-light) 240deg 270deg, var(--wheel-paper) 270deg 300deg, var(--wheel-blue-light) 300deg 330deg, var(--wheel-paper) 330deg 360deg);
+  --wheel-disc-gradient: conic-gradient(from -15deg, var(--wheel-blue-light) 0deg 30deg, var(--wheel-paper) 30deg 60deg, var(--wheel-blue-light) 60deg 90deg, var(--wheel-paper) 90deg 120deg, var(--wheel-blue-light) 120deg 150deg, var(--wheel-paper) 150deg 180deg, var(--wheel-blue-light) 180deg 210deg, var(--wheel-paper) 210deg 240deg, var(--wheel-blue-light) 240deg 270deg, var(--wheel-paper) 270deg 300deg, var(--wheel-blue-light) 300deg 330deg, var(--wheel-paper) 330deg 360deg);
   --wheel-shadow: 0 7px 0 var(--ink), inset 0 2px 2px var(--wheel-paper);
   --merge-glass: color-mix(in oklch, var(--cream) 10%, transparent);
   --merge-line: color-mix(in oklch, var(--cream) 20%, transparent);
@@ -77,53 +77,53 @@
   --merge-slot: color-mix(in oklch, var(--ink) 44%, transparent);
   --merge-highlight: color-mix(in oklch, var(--sun) 18%, transparent);
   --merge-shadow: 0 20px 50px -12px color-mix(in oklch, var(--ink) 80%, transparent), inset 0 1px 0 var(--merge-line);
-  --radius: 1rem;
-  --background: oklch(0.22 0.08 285);
-  --foreground: oklch(0.97 0.02 90);
-  --card: oklch(0.32 0.14 300);
-  --card-foreground: oklch(0.97 0.02 90);
-  --popover: oklch(0.3 0.12 300);
-  --popover-foreground: oklch(0.97 0.02 90);
-  --primary: oklch(0.85 0.17 85);
-  --primary-foreground: oklch(0.18 0.04 280);
-  --secondary: oklch(0.35 0.12 290);
-  --secondary-foreground: oklch(0.97 0.02 90);
-  --muted: oklch(0.3 0.08 285);
-  --muted-foreground: oklch(0.72 0.06 285);
-  --accent: oklch(0.72 0.17 230);
-  --accent-foreground: oklch(0.18 0.04 280);
+  --radius: .5rem;
+  --background: oklch(0.16 0.006 260);
+  --foreground: oklch(0.96 0.004 260);
+  --card: oklch(0.22 0.008 260);
+  --card-foreground: var(--foreground);
+  --popover: var(--card);
+  --popover-foreground: var(--foreground);
+  --primary: oklch(0.9 0.16 95);
+  --primary-foreground: oklch(0.16 0.006 260);
+  --secondary: oklch(0.27 0.008 260);
+  --secondary-foreground: var(--foreground);
+  --muted: var(--secondary);
+  --muted-foreground: oklch(0.68 0.015 260);
+  --accent: oklch(0.79 0.12 195);
+  --accent-foreground: var(--primary-foreground);
   --destructive: oklch(0.63 0.23 20);
   --destructive-foreground: oklch(0.98 0 0);
-  --border: oklch(0.15 0.04 280);
-  --input: oklch(0.15 0.04 280);
-  --ring: oklch(0.85 0.17 85);
-  --ink: oklch(0.15 0.04 280);
-  --night: oklch(0.2 0.07 280);
-  --grape: oklch(0.42 0.2 305);
-  --sun: oklch(0.87 0.17 88);
-  --sun-dark: oklch(0.68 0.16 60);
-  --lime: oklch(0.82 0.21 135);
-  --sky: oklch(0.72 0.15 235);
-  --berry: oklch(0.65 0.24 15);
-  --cream: oklch(0.98 0.02 95);
+  --border: oklch(0.33 0.009 260);
+  --input: var(--border);
+  --ring: var(--primary);
+  --ink: oklch(0.12 0.005 260);
+  --night: var(--background);
+  --grape: var(--secondary);
+  --sun: var(--primary);
+  --sun-dark: oklch(0.78 0.14 92);
+  --lime: oklch(0.8 0.14 155);
+  --sky: oklch(0.79 0.12 195);
+  --berry: oklch(0.7 0.16 20);
+  --cream: oklch(0.97 0.006 95);
 }
 @theme inline {
   --color-ink: var(--ink); --color-night: var(--night); --color-grape: var(--grape);
   --color-sun: var(--sun); --color-sun-dark: var(--sun-dark); --color-lime: var(--lime);
   --color-sky: var(--sky); --color-berry: var(--berry); --color-cream: var(--cream);
-  --font-display: "Lilita One", system-ui, sans-serif;
-  --font-sans: "Fredoka", system-ui, sans-serif;
-  --shadow-chunk: 0 5px 0 var(--ink);
+  --font-display: "Outfit", system-ui, sans-serif;
+  --font-sans: "Figtree", system-ui, sans-serif;
+  --shadow-chunk: 0 1px 0 var(--border);
 }
 body { font-family: var(--font-sans); }
 @utility bg-stage { background: radial-gradient(circle at 70% 10%, oklch(0.4 0.12 270), var(--background) 55%), var(--background); }
-@utility text-outline { -webkit-text-stroke: 1.5px var(--ink); paint-order: stroke fill; text-shadow: 0 3px 0 var(--ink); }
+@utility text-outline { -webkit-text-stroke: 0; text-shadow: none; }
 @utility chunk-btn {
-  display: inline-grid; place-items: center; border: 4px solid var(--ink); border-radius: 1rem;
-  font-family: var(--font-display); color: var(--cream); box-shadow: inset 0 -5px 0 oklch(0 0 0 / 0.25), inset 0 3px 0 oklch(1 0 0 / 0.35), 0 5px 0 var(--ink);
-  transition: transform .08s, box-shadow .08s; -webkit-text-stroke: 1px var(--ink); paint-order: stroke fill;
-  &:active { transform: translateY(4px); box-shadow: inset 0 -2px 0 oklch(0 0 0 / 0.25), 0 1px 0 var(--ink); }
-  &:disabled { filter: grayscale(.7) brightness(.8); }
+  display: inline-grid; place-items: center; border: 1px solid var(--border); border-radius: 8px;
+  font-family: var(--font-sans); font-weight: 600; color: var(--foreground); box-shadow: none;
+  transition: transform .15s, background .15s;
+  &:active { transform: scale(.97); }
+  &:disabled { opacity: .45; }
 }
 @keyframes reel-blur { from { transform: translateY(0) } to { transform: translateY(-50%) } }
 @keyframes thud { 0% { transform: translateY(-14px) } 60% { transform: translateY(5px) } 100% { transform: translateY(0) } }
@@ -288,3 +288,121 @@ body { font-family: var(--font-sans); }
 .nft-sale-info p { font-size: 13px; line-height: 1.6; color: var(--merge-dim); margin: 8px 0 16px; }
 .nft-buy { width: 100%; background: var(--sun); color: var(--ink); justify-content: space-between; height: 44px; border-radius: 8px; }
 .nft-buy:hover { background: var(--sun); filter: brightness(1.06); }
+
+/* Shared restrained game shell. */
+:root, .dark {
+  --surface-glass: color-mix(in oklch, var(--card) 92%, transparent);
+  --surface-line: color-mix(in oklch, var(--foreground) 12%, transparent);
+  --surface-shadow: 0 12px 40px color-mix(in oklch, var(--ink) 24%, transparent);
+  --reel-shadow: inset 0 12px 20px -15px var(--muted-foreground), inset 0 -12px 20px -15px var(--muted-foreground);
+}
+body { margin: 0; letter-spacing: 0; }
+.app-screen { position: relative; margin: auto; display: flex; height: 100dvh; max-width: 448px; flex-direction: column; overflow: hidden; background: var(--background); }
+.app-sky { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: .09; pointer-events: none; }
+.app-topbar { position: relative; z-index: 30; display: flex; flex-shrink: 0; align-items: center; height: 66px; gap: 10px; padding: 12px 18px; border-bottom: 1px solid var(--surface-line); background: var(--surface-glass); backdrop-filter: blur(24px); }
+.app-avatar { position: relative; width: 34px; height: 36px; flex-shrink: 0; }
+.app-avatar img { width: 100%; height: 100%; object-fit: contain; }
+.app-avatar span { position: absolute; bottom: -3px; right: -4px; display: grid; place-items: center; height: 15px; min-width: 15px; padding: 0 2px; border-radius: 4px; background: var(--sun); color: var(--ink); font-size: 9px; font-weight: 700; }
+.app-balances { margin-left: auto; display: flex; align-items: center; gap: 6px; min-width: 0; }
+.balance-pill { height: 30px; display: flex; align-items: center; gap: 3px; padding: 0 7px 0 3px; border-radius: 6px; background: var(--ink); font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.balance-pill img { width: 24px; height: 24px; object-fit: contain; }
+.app-sound { width: 28px; height: 30px; flex-shrink: 0; color: var(--muted-foreground); padding: 0; }
+.app-main { position: relative; flex: 1; min-height: 0; scrollbar-width: thin; scrollbar-color: var(--border) transparent; }
+.app-nav { position: relative; flex-shrink: 0; z-index: 30; background: var(--surface-glass); border-top: 1px solid var(--surface-line); padding: 0 8px env(safe-area-inset-bottom); backdrop-filter: blur(24px); }
+.app-nav-grid { display: grid; grid-template-columns: 1fr 1fr 1.45fr 1fr 1fr; height: 84px; }
+.app-nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; color: var(--muted-foreground); transition: color .2s; }
+.app-nav-item svg { width: 22px; height: 22px; }
+.app-nav-item span { font-size: 9px; font-weight: 600; }
+.app-nav-item[data-status="active"] { color: var(--sun); }
+.app-nav-center { position: relative; }
+.app-spin-holder { position: absolute; width: 80px; height: 66px; top: -24px; left: 50%; transform: translateX(-50%); }
+.app-home-spin, .slot-spin { width: 100%; height: 100%; border-radius: 19px; background: var(--sun); color: var(--ink); font-family: var(--font-display); font-weight: 800; font-size: 22px; border: 4px solid var(--background); box-shadow: none; }
+.app-home-spin:hover, .slot-spin:hover { background: var(--sun-dark); }
+.app-spin-meter { position: absolute; bottom: 12px; left: 8px; right: 8px; height: 17px; border-radius: 5px; background: var(--ink); overflow: hidden; }
+.app-spin-meter > span { display: block; height: 100%; background: color-mix(in oklch, var(--sky) 22%, var(--ink)); }
+.app-spin-meter strong { position: absolute; inset: 0; text-align: center; font-size: 10px; line-height: 17px; font-weight: 600; }
+.slot-spin-controls { position: relative; width: 100%; height: 100%; }
+.slot-spin-auto { background: var(--berry); }
+.slot-bet { position: absolute; right: -19px; top: -8px; width: 37px; height: 25px; padding: 0; border-radius: 7px; border: 1px solid var(--surface-line); background: var(--card); color: var(--foreground); font-size: 11px; font-weight: 700; }
+.slot-page { display: flex; height: 100%; flex-direction: column; align-items: center; justify-content: center; padding: 20px 20px 40px; }
+.slot-content { width: 100%; max-width: 374px; }
+.slot-machine { padding: 0; }
+.slot-status { display: flex; height: 62px; gap: 12px; align-items: center; overflow: hidden; padding: 0 0 14px; border-bottom: 1px solid var(--surface-line); }
+.slot-status .font-display { font-weight: 600; }
+.slot-status .tracking-wider { letter-spacing: 0; }
+.slot-event { display: flex; align-items: center; gap: 10px; padding: 18px 0; }
+.slot-event .border-2, .slot-pass .border-2 { border: none; }
+.slot-event .bg-gradient-to-r { background: var(--sun); }
+.slot-reels { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 7px; padding: 7px; border: 1px solid var(--surface-line); background: var(--surface-glass); border-radius: 20px; box-shadow: var(--surface-shadow); }
+.slot-reel { position: relative; height: 184px; overflow: hidden; border-radius: 13px; background: var(--cream); box-shadow: var(--reel-shadow); }
+.slot-pass { padding-top: 3px; }
+.slot-pass .bg-gradient-to-r { background: var(--sky); }
+.slot-pass .bg-gradient-to-b { background: var(--secondary); }
+.slot-pass .bg-gradient-to-br { background: var(--sun); color: var(--ink); box-shadow: none; }
+.slot-pass .bg-gradient-to-br > span { color: var(--ink); font-weight: 700; }
+.merge-page { max-width: 414px; padding: 20px 20px 38px; gap: 16px; }
+.merge-production { color: var(--foreground); font-weight: 700; font-size: 17px; gap: 7px; }
+.merge-production small { color: var(--muted-foreground); font-weight: 500; }
+.merge-book { border-radius: 8px; background: var(--card); }
+.merge-grid { gap: 8px; }
+.merge-cell { background: color-mix(in oklch, var(--card) 65%, transparent); border: 1px solid var(--surface-line); border-radius: 8px; }
+.merge-cell::before { border: 0; opacity: .4; }
+.merge-cell-active { background: var(--merge-highlight); border-color: var(--sun); }
+.merge-cell-match { border: 1px dashed var(--sun); }
+.merge-cell-button { border-radius: 8px; }
+.merge-level { bottom: 5px; right: 5px; background: var(--secondary); font-weight: 600; }
+.merge-next { height: 43px; }
+.merge-next strong { font-weight: 600; }
+.merge-next > div > span { font-size: 9px; }
+.merge-buy, .merge-claim { border-radius: 8px; height: 48px; box-shadow: none; }
+.merge-claim { background: var(--card); }
+.merge-collection { border-radius: 8px; }
+.fortune-page { gap: 18px; padding: 12px 12px 20px; }
+.fortune-title { font-size: 24px; font-weight: 700; -webkit-text-stroke: 0; text-shadow: none; margin-top: 26px; }
+.fortune-stage { width: min(100%, 410px, calc((100dvh - 290px) / 1.13)); }
+.fortune-rim { border: 2px solid var(--wheel-blue); box-shadow: var(--surface-shadow), inset 0 0 0 2px var(--wheel-blue-light); }
+.fortune-stand { border: 0; border-radius: 8px; }
+.fortune-stand span { -webkit-text-stroke: 0; font-weight: 700; font-size: 17px; }
+.fortune-prize span { color: var(--ink); font-weight: 800; font-size: 16px; -webkit-text-stroke: 0; text-shadow: none; }
+.fortune-bulb-pink i { background: var(--wheel-glow); box-shadow: 0 0 7px var(--wheel-glow); }
+.fortune-spin { background: var(--sun); color: var(--ink); font-weight: 800; font-size: 22px; border: 0; border-radius: 8px; box-shadow: none; -webkit-text-stroke: 0; height: 52px; }
+.fortune-result { font-size: 14px; font-weight: 600; }
+.fortune-tickets { color: var(--muted-foreground); font-size: 12px; }
+.nft-page { padding: 24px 20px 42px; }
+.nft-heading { margin-bottom: 24px; }
+.nft-heading h1 { font-size: 34px; font-weight: 700; }
+.nft-eyebrow { font-size: 10px; }
+.nft-wallet { background: var(--card); border-radius: 8px; }
+.nft-intro { padding: 0 0 20px; }
+.nft-intro h2 { font-size: 17px; }
+.nft-intro span { color: var(--muted-foreground); }
+.nft-tabs { padding: 3px; border-radius: 8px; background: var(--ink); margin-bottom: 24px; }
+.nft-tabs button { height: 34px; font-size: 11px; }
+.nft-tabs .nft-tab-active { background: var(--secondary); color: var(--foreground); }
+.nft-sale-list { gap: 24px; }
+.nft-sale { background: var(--card); border-color: var(--surface-line); }
+.nft-sale-art { height: 252px; padding: 20px; background: color-mix(in oklch, var(--sky) 7%, var(--background)); }
+.nft-fantasy .nft-sale-art { background: color-mix(in oklch, var(--berry) 7%, var(--background)); }
+.nft-legends .nft-sale-art { background: color-mix(in oklch, var(--lime) 7%, var(--background)); }
+.nft-sale-info { padding: 20px; }
+.nft-sale-info h2 { font-weight: 600; font-size: 24px; }
+.nft-sale-info p { line-height: 1.65; }
+.nft-sale-family { color: var(--muted-foreground); }
+.nft-buy { font-weight: 700; }
+.earn-heading { margin-bottom: 22px; }
+.earn-heading span { font-size: 10px; color: var(--muted-foreground); }
+.earn-heading h1 { font-family: var(--font-display); font-weight: 700; font-size: 34px; }
+.earn-tabs { padding: 3px; border-radius: 8px; background: var(--ink); }
+.earn-tabs .chunk-btn { border: 0; height: 36px; font-size: 11px; background: transparent; color: var(--muted-foreground); }
+.earn-tabs .bg-sun { background: var(--secondary); color: var(--foreground); }
+.earn-page h2 { color: var(--foreground); font-size: 19px; font-weight: 600; margin-bottom: 16px; }
+.earn-page .shadow-chunk { box-shadow: none; padding: 13px; border-color: var(--surface-line); }
+.earn-page .bg-lime, .earn-page .bg-sky { background: var(--secondary); color: var(--foreground); }
+.earn-page .bg-sun-dark { background: var(--secondary); }
+.earn-section { padding: 18px 0; border-bottom: 1px solid var(--surface-line); }
+.earn-page { padding-bottom: 24px; }
+.pass-page h1 { color: var(--foreground); font-weight: 700; font-size: 28px; }
+@media (max-width: 370px) { .app-topbar { padding-inline: 10px; gap: 6px; } .app-balances { gap: 3px; } .balance-pill { font-size: 11px; padding-right: 4px; } .balance-pill img { width: 20px; } .slot-page { padding-inline: 16px; } }
+@media (max-height: 620px) { .slot-page { padding-top: 10px; padding-bottom: 26px; } .slot-event { padding-block: 12px; } .slot-reel { height: 148px; } .slot-status { height: 52px; } .merge-page { gap: 9px; padding-top: 12px; } .fortune-page { gap: 12px; } }
+@media (min-height: 900px) { .merge-world { height: 480px; } }
+@media (prefers-reduced-motion: reduce) { .animate-bob, .animate-pop, .animate-thud, .animate-shake { animation: none; } }
