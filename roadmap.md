@@ -1,4 +1,5 @@
 # Roadmap
+- [ ] Refresh the entire app UI with a restrained shared theme, clean navigation and consistent page controls; preserve game rules
 - [x] Replace NFT favorites gallery with clean artwork, explanation, names and TON buy buttons
 - [ ] Enable real NFT purchase — waiting for deployed sale contract/listings and actual TON prices
 - [x] Standalone wheel without bottom navigation and reference-sized wheel with its own spin button
