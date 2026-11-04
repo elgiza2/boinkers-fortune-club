@@ -167,8 +167,8 @@ function Home() {
 
         {/* events row */}
         <div className="relative mt-4 overflow-hidden">
-          <div className="flex w-max animate-marquee gap-3 px-2">
-            {[...EVENTS, ...EVENTS].map((e, i) => (
+          <div className="flex justify-center gap-1 px-2">
+            {EVENTS.slice(0, 6).map((e, i) => (
               <div key={i} className="flex w-[68px] flex-col items-center">
                 <span className="text-4xl drop-shadow-[0_3px_0_var(--ink)]">{e.icon}</span>
                 <span className="-mt-1 rounded-md border-2 border-ink bg-cream px-1 font-display text-[10px] text-berry">{t(e.h)}</span>
