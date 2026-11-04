@@ -5,4 +5,4 @@
 - [x] Smaller header
 - [x] No emojis
 - [ ] Fire Pass page (FREE progress bar) — later
-- [ ] Slot machine exterior: clean iOS style (glass, soft radius)
+- [x] Slot machine exterior: clean iOS style (glass, soft radius)
