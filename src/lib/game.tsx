@@ -155,6 +155,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
   }, []);
   const claimMilestone = useCallback((i: number) => {
     const m = MILESTONES[i];
+    if (!m) return;
     setS((p) => p.claimedMilestones.includes(i) || p.tokens < m.at ? p : {
       ...p, claimedMilestones: [...p.claimedMilestones, i],
       coins: p.coins + (m.reward.coins ?? 0), spins: p.spins + (m.reward.spins ?? 0), tickets: p.tickets + (m.reward.tickets ?? 0),

@@ -16,7 +16,7 @@ export const Route = createFileRoute("/")({
   component: Home,
 });
 
-const rnd = () => SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)];
+const rnd = (): Sym => SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)]!;
 const EVENTS = [
   { icon: "🎃", name: "Spooky Scratch", h: 14 }, { icon: "🏆", name: "Fish Cup", h: 6 }, { icon: "🐉", name: "Dragon Trail", h: 30 },
   { icon: "🎲", name: "Game Night", h: 38 }, { icon: "🚗", name: "Board Heist", h: 9 },
@@ -62,6 +62,7 @@ function Home() {
 
   useEffect(() => {
     if (auto && !busy) { const t = setTimeout(spin, 400); return () => clearTimeout(t); }
+    return undefined;
   }); // eslint-disable-line react-hooks/exhaustive-deps
 
   const offerLeft = 15 * 60_000 - ((now - base) % (15 * 60_000));
@@ -154,7 +155,7 @@ function RouletteModal({ open, onClose }: { open: boolean; onClose: () => void }
     const idx = Math.floor(Math.random() * PRIZES.length);
     const target = rot + 360 * 6 + (360 - idx * seg - seg / 2 - (rot % 360));
     setRot(target);
-    setTimeout(() => { grant(PRIZES[idx].r); beep(s.sound, 1000, 0.3); toast.success(`You won ${PRIZES[idx].label}!`); setBusy(false); }, 4200);
+    setTimeout(() => { const pr = PRIZES[idx]!; grant(pr.r); beep(s.sound, 1000, 0.3); toast.success(`You won ${pr.label}!`); setBusy(false); }, 4200);
   };
   const grad = PRIZES.map((_, i) => `${SEG_COLORS[i % 4]} ${i * seg}deg ${(i + 1) * seg}deg`).join(",");
   return (
