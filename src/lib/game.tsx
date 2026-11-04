@@ -1,0 +1,199 @@
+import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from "react";
+
+export const MAX_SPINS = 50;
+export const SPIN_REGEN_MS = 60_000; // 1 spin / minute
+export const PART_MAX = 3;
+export type Part = "head" | "body" | "gear";
+
+export const SYMBOLS = ["🪙", "⚡", "💎", "🎁", "🍒", "🎟️"] as const;
+export type Sym = (typeof SYMBOLS)[number];
+
+export interface GameState {
+  coins: number;
+  solo: number;
+  spins: number;
+  tickets: number;
+  tokens: number;
+  level: number;
+  parts: Record<Part, number>;
+  lastSpinRegen: number;
+  lastSoloClaim: number;
+  tasksDone: string[];
+  claimedMilestones: number[];
+  sound: boolean;
+}
+
+const initial = (): GameState => ({
+  coins: 5000, solo: 0, spins: MAX_SPINS, tickets: 1, tokens: 0, level: 1,
+  parts: { head: 0, body: 0, gear: 0 },
+  lastSpinRegen: Date.now(), lastSoloClaim: Date.now(),
+  tasksDone: [], claimedMilestones: [], sound: true,
+});
+
+/** Solo per hour grows with character upgrades and level. */
+export function soloRate(s: Pick<GameState, "parts" | "level">) {
+  const total = s.parts.head + s.parts.body + s.parts.gear;
+  return Math.round(100 * (1 + total * 0.5) * (1 + (s.level - 1) * 0.25));
+}
+/** Coin cost of the next upgrade on a part — escalates per tier and level. */
+export function upgradeCost(level: number, tier: number) {
+  return Math.round(1000 * Math.pow(2, tier) * Math.pow(1.8, level - 1));
+}
+/** Payout for a slot result, scaled by bet multiplier. */
+export function slotPayout(r: Sym[], bet: number) {
+  const [a, b, c] = r;
+  const out = { coins: 0, spins: 0, tickets: 0, tokens: 1 * bet };
+  if (a === b && b === c) {
+    const map: Record<Sym, Partial<typeof out>> = {
+      "🪙": { coins: 5000 }, "⚡": { spins: 10 }, "💎": { coins: 20000 },
+      "🎁": { coins: 3000, spins: 5 }, "🍒": { coins: 2000 }, "🎟️": { tickets: 1 },
+    };
+    const m = map[a];
+    out.coins += (m.coins ?? 0) * bet; out.spins += (m.spins ?? 0) * bet; out.tickets += m.tickets ?? 0;
+    out.tokens += 5 * bet;
+  } else if (a === b || b === c || a === c) {
+    out.coins += 300 * bet;
+  }
+  return out;
+}
+
+export const MILESTONES = [
+  { at: 10, label: "500 Coins", reward: { coins: 500 } },
+  { at: 30, label: "5 Spins", reward: { spins: 5 } },
+  { at: 60, label: "Ticket", reward: { tickets: 1 }, big: true },
+  { at: 100, label: "3K Coins", reward: { coins: 3000 } },
+  { at: 160, label: "15 Spins", reward: { spins: 15 } },
+  { at: 250, label: "2 Tickets", reward: { tickets: 2 }, big: true },
+  { at: 400, label: "25K Coins", reward: { coins: 25000 }, big: true },
+];
+
+type Reward = Partial<Pick<GameState, "coins" | "spins" | "tickets" | "solo" | "tokens">>;
+
+interface Ctx {
+  s: GameState;
+  ready: boolean;
+  pendingSolo: number;
+  nextSpinIn: number;
+  grant: (r: Reward) => void;
+  spend: (r: Reward) => boolean;
+  claimSolo: () => number;
+  upgrade: (p: Part) => boolean;
+  completeTask: (id: string, r: Reward) => void;
+  claimMilestone: (i: number) => void;
+  toggleSound: () => void;
+}
+const GameCtx = createContext<Ctx | null>(null);
+const KEY = "solo-slots-v1";
+
+export function GameProvider({ children }: { children: ReactNode }) {
+  const [s, setS] = useState<GameState>(initial);
+  const [ready, setReady] = useState(false);
+  const [now, setNow] = useState(() => Date.now());
+  const loaded = useRef(false);
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(KEY);
+      if (raw) setS({ ...initial(), ...JSON.parse(raw) });
+    } catch { /* ignore */ }
+    loaded.current = true; setReady(true);
+    const t = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(t);
+  }, []);
+  useEffect(() => { if (loaded.current) localStorage.setItem(KEY, JSON.stringify(s)); }, [s]);
+
+  // spin regen
+  useEffect(() => {
+    setS((p) => {
+      if (p.spins >= MAX_SPINS) return p.lastSpinRegen === now ? p : { ...p, lastSpinRegen: now };
+      const gained = Math.floor((now - p.lastSpinRegen) / SPIN_REGEN_MS);
+      if (gained <= 0) return p;
+      return { ...p, spins: Math.min(MAX_SPINS, p.spins + gained), lastSpinRegen: p.lastSpinRegen + gained * SPIN_REGEN_MS };
+    });
+  }, [now]);
+
+  const pendingSolo = Math.floor(((now - s.lastSoloClaim) / 3_600_000) * soloRate(s));
+  const nextSpinIn = s.spins >= MAX_SPINS ? 0 : Math.max(0, SPIN_REGEN_MS - (now - s.lastSpinRegen));
+
+  const grant = useCallback((r: Reward) => setS((p) => ({
+    ...p, coins: p.coins + (r.coins ?? 0), spins: p.spins + (r.spins ?? 0), tickets: p.tickets + (r.tickets ?? 0),
+    solo: p.solo + (r.solo ?? 0), tokens: p.tokens + (r.tokens ?? 0),
+  })), []);
+  const spend = useCallback((r: Reward) => {
+    let ok = true;
+    setS((p) => {
+      if ((r.coins ?? 0) > p.coins || (r.spins ?? 0) > p.spins || (r.tickets ?? 0) > p.tickets) { ok = false; return p; }
+      return { ...p, coins: p.coins - (r.coins ?? 0), spins: p.spins - (r.spins ?? 0), tickets: p.tickets - (r.tickets ?? 0) };
+    });
+    return ok && (r.coins ?? 0) <= s.coins && (r.spins ?? 0) <= s.spins && (r.tickets ?? 0) <= s.tickets;
+  }, [s]);
+  const claimSolo = useCallback(() => {
+    const amt = pendingSolo;
+    setS((p) => ({ ...p, solo: p.solo + amt, lastSoloClaim: Date.now() }));
+    return amt;
+  }, [pendingSolo]);
+  const upgrade = useCallback((part: Part) => {
+    const tier = s.parts[part];
+    const cost = upgradeCost(s.level, tier);
+    if (tier >= PART_MAX || s.coins < cost) return false;
+    const earned = Math.floor(((Date.now() - s.lastSoloClaim) / 3_600_000) * soloRate(s));
+    setS((p) => {
+      const parts = { ...p.parts, [part]: p.parts[part] + 1 };
+      const full = parts.head + parts.body + parts.gear >= PART_MAX * 3;
+      // bank solo at the old rate before the rate changes
+      return {
+        ...p, coins: p.coins - cost, solo: p.solo + earned, lastSoloClaim: Date.now(),
+        parts: full ? { head: 0, body: 0, gear: 0 } : parts, level: full ? p.level + 1 : p.level,
+      };
+    });
+    return true;
+  }, [s]);
+  const completeTask = useCallback((id: string, r: Reward) => {
+    setS((p) => p.tasksDone.includes(id) ? p : {
+      ...p, tasksDone: [...p.tasksDone, id], coins: p.coins + (r.coins ?? 0), spins: p.spins + (r.spins ?? 0), tickets: p.tickets + (r.tickets ?? 0),
+    });
+  }, []);
+  const claimMilestone = useCallback((i: number) => {
+    const m = MILESTONES[i];
+    setS((p) => p.claimedMilestones.includes(i) || p.tokens < m.at ? p : {
+      ...p, claimedMilestones: [...p.claimedMilestones, i],
+      coins: p.coins + (m.reward.coins ?? 0), spins: p.spins + (m.reward.spins ?? 0), tickets: p.tickets + (m.reward.tickets ?? 0),
+    });
+  }, []);
+  const toggleSound = useCallback(() => setS((p) => ({ ...p, sound: !p.sound })), []);
+
+  return <GameCtx.Provider value={{ s, ready, pendingSolo, nextSpinIn, grant, spend, claimSolo, upgrade, completeTask, claimMilestone, toggleSound }}>{children}</GameCtx.Provider>;
+}
+
+export function useGame() {
+  const c = useContext(GameCtx);
+  if (!c) throw new Error("useGame outside provider");
+  return c;
+}
+
+export function fmt(n: number) {
+  if (n >= 1e9) return (n / 1e9).toFixed(2).replace(/\.?0+$/, "") + "B";
+  if (n >= 1e6) return (n / 1e6).toFixed(2).replace(/\.?0+$/, "") + "M";
+  if (n >= 1e3) return (n / 1e3).toFixed(1).replace(/\.0$/, "") + "K";
+  return String(Math.floor(n));
+}
+export function clock(ms: number) {
+  const t = Math.max(0, Math.floor(ms / 1000));
+  const h = Math.floor(t / 3600), m = Math.floor((t % 3600) / 60), sec = t % 60;
+  return [h, m, sec].map((x) => String(x).padStart(2, "0")).join(":");
+}
+
+let ctx: AudioContext | null = null;
+export function beep(on: boolean, freq = 600, dur = 0.08) {
+  if (!on || typeof window === "undefined") return;
+  try {
+    ctx ??= new AudioContext();
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = "square"; o.frequency.value = freq; g.gain.value = 0.05;
+    o.connect(g); g.connect(ctx.destination); o.start();
+    g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + dur); o.stop(ctx.currentTime + dur);
+  } catch { /* ignore */ }
+}
+export function haptic() {
+  try { (window as any).Telegram?.WebApp?.HapticFeedback?.impactOccurred("medium"); } catch { /* ignore */ }
+}
