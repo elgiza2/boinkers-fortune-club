@@ -59,7 +59,7 @@ export function BottomNav({ center }: { center?: ReactNode }) {
   return (
     <nav className="relative z-30 shrink-0 pb-[env(safe-area-inset-bottom)]">
       <div className="relative grid h-[78px] grid-cols-[1fr_1fr_1.9fr_1fr_1fr] border-t-[3px] border-ink bg-night">
-        <NavItem icon={ART.rocket} label="UPGRADE" to="/upgrade" dot divider="r" />
+        <NavItem icon={ART.rocket} label="UPGRADE" to="/upgrade" divider="r" />
         <NavItem icon={ART.bag} label="EARN" to="/earn" divider="r" />
         <div className="relative">
           <div className="absolute left-1/2 top-[-58px] h-[112px] w-[112px] -translate-x-1/2">
