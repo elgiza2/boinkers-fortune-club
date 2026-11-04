@@ -1,5 +1,5 @@
 # Roadmap
-- [ ] Simplify Merge Island and replace creatures with the user's golden mascot with natural faces
+- [x] Simplify Merge Island and replace creatures with the user's golden mascot with natural faces
 - [x] Restyle Merge Island to match slot identity: night sky, glass board, larger characters, matching controls and collection
 - [x] Defer database use: remove account sync and keep Merge Island on existing local game state
 - [x] Merge Island: clean board, coin purchases, matching-character drag merge, evolving families, SOLO production, tests
