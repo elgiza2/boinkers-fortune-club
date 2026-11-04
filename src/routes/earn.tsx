@@ -4,7 +4,6 @@ import { toast } from "sonner";
 import { Screen } from "@/components/game/Shell";
 import { ART } from "@/lib/art";
 import { fmt, useGame } from "@/lib/game";
-import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/earn")({
   head: () => ({
@@ -26,11 +25,9 @@ function Earn() {
   const [tab, setTab] = useState<(typeof TABS)[number]>("Tasks");
   return (
     <Screen>
-      <div className="earn-page">
-      <header className="earn-heading"><span>YOUR REWARDS</span><h1>Earn</h1></header>
-      <div className="earn-tabs grid grid-cols-4 gap-1.5">
+      <div className="grid grid-cols-4 gap-1.5">
         {TABS.map((t) => (
-          <Button variant="ghost" key={t} onClick={() => setTab(t)} className={`chunk-btn py-2 text-sm ${tab === t ? "bg-sun" : "bg-secondary"}`}>{t.toUpperCase()}</Button>
+          <button key={t} onClick={() => setTab(t)} className={`chunk-btn py-2 text-sm ${tab === t ? "bg-sun" : "bg-secondary"}`}>{t.toUpperCase()}</button>
         ))}
       </div>
       <div className="mt-4">
@@ -39,7 +36,6 @@ function Earn() {
         {tab === "Top" && <Leaderboard />}
         {tab === "Shop" && <Shop />}
       </div>
-      </div>
     </Screen>
   );
 }
@@ -47,7 +43,7 @@ function Earn() {
 const TASKS = [
   { id: "tg", icon: ART.bag, title: "Join our Telegram channel", url: "https://t.me/telegram", r: { spins: 10 } },
   { id: "x", icon: ART.rocket, title: "Follow us on X", url: "https://x.com", r: { coins: 5000 } },
-  { id: "yt", icon: ART.bolt, title: "Watch the trailer", url: "https://youtube.com", r: { spins: 15 } },
+  { id: "yt", icon: "▶️", title: "Watch the trailer", url: "https://youtube.com", r: { spins: 15 } },
   { id: "story", icon: ART.book, title: "Share a story", url: "https://t.me", r: { tickets: 1 } },
 ];
 
@@ -56,18 +52,18 @@ function Tasks() {
   const [opened, setOpened] = useState<string[]>([]);
   return (
     <div className="space-y-2">
-      <h2 className="font-display text-2xl text-sun text-outline">Complete & earn</h2>
+      <h2 className="font-display text-2xl text-sun text-outline">COMPLETE & EARN</h2>
       {TASKS.map((t) => {
         const done = s.tasksDone.includes(t.id), go = opened.includes(t.id);
         const label = t.r.spins ? `+${t.r.spins} SPINS` : t.r.coins ? `+${fmt(t.r.coins)} COINS` : `+${t.r.tickets} TICKET`;
         return (
-          <div key={t.id} className="flex items-center gap-3 rounded-lg border border-border bg-card p-2 shadow-chunk">
+          <div key={t.id} className="flex items-center gap-3 rounded-2xl border-4 border-ink bg-card p-2 shadow-chunk">
             <img src={t.icon} alt="" className="h-9 w-9 object-contain" />
             <div className="flex-1"><div className="font-semibold leading-tight">{t.title}</div><div className="font-display text-sm text-sun">{label}</div></div>
-            <Button variant="ghost" disabled={done} onClick={() => {
+            <button disabled={done} onClick={() => {
               if (!go) { window.open(t.url, "_blank"); setOpened((o) => [...o, t.id]); }
               else { completeTask(t.id, t.r); toast.success(`Reward ${label}`); }
-            }} className={`chunk-btn px-3 py-1.5 text-sm ${go ? "bg-lime" : "bg-sky"}`}>{done ? "DONE" : go ? "VERIFY" : "GO"}</Button>
+            }} className={`chunk-btn px-3 py-1.5 text-sm ${go ? "bg-lime" : "bg-sky"}`}>{done ? "DONE" : go ? "VERIFY" : "GO"}</button>
           </div>
         );
       })}
@@ -82,16 +78,16 @@ function Friends() {
   const invited = 0;
   return (
     <div className="space-y-3">
-      <h2 className="font-display text-2xl text-sun text-outline">Invite friends</h2>
-      <div className="earn-section">
+      <h2 className="font-display text-2xl text-sun text-outline">INVITE FRIENDS</h2>
+      <div className="rounded-2xl border-4 border-ink bg-card p-3 shadow-chunk">
         <p className="text-sm">Each friend gives you <b className="text-sun">+10 SPINS</b> and 10% of their Solo.</p>
         <div className="mt-2 truncate rounded-xl border-[3px] border-ink bg-ink/60 px-2 py-2 font-mono text-xs">{link}</div>
         <div className="mt-2 grid grid-cols-2 gap-2">
-          <Button variant="ghost" onClick={() => { navigator.clipboard?.writeText(link); toast.success("Link copied!"); }} className="chunk-btn bg-sky py-2">COPY</Button>
-          <Button variant="ghost" onClick={() => window.open(`https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent("Spin with me in Solo Slots!")}`, "_blank")} className="chunk-btn bg-lime py-2">SHARE</Button>
+          <button onClick={() => { navigator.clipboard?.writeText(link); toast.success("Link copied!"); }} className="chunk-btn bg-sky py-2">COPY</button>
+          <button onClick={() => window.open(`https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent("Spin with me in Solo Slots!")}`, "_blank")} className="chunk-btn bg-lime py-2">SHARE</button>
         </div>
       </div>
-      <div className="earn-section">
+      <div className="rounded-2xl border-4 border-ink bg-grape p-3 shadow-chunk">
         <div className="mb-2 font-display">REFERRAL REWARDS · {invited} invited</div>
         <div className="flex items-center justify-between">
           {REF_STEPS.map((st) => (
@@ -113,9 +109,9 @@ function Leaderboard() {
   const rows = [...BOARD.map(([n, v]) => ({ n, v, me: false })), { n: "You", v: s.solo, me: true }].sort((a, b) => b.v - a.v);
   return (
     <div className="space-y-2">
-      <h2 className="font-display text-2xl text-sun text-outline">Leaderboard</h2>
+      <h2 className="font-display text-2xl text-sun text-outline">SOLO LEADERBOARD</h2>
       {rows.map((r, i) => (
-        <div key={r.n} className={`flex items-center gap-3 rounded-lg border border-border p-2 shadow-chunk ${r.me ? "bg-sun-dark" : "bg-card"}`}>
+        <div key={r.n} className={`flex items-center gap-3 rounded-2xl border-4 border-ink p-2 shadow-chunk ${r.me ? "bg-sun-dark" : "bg-card"}`}>
           <span className="w-8 text-center font-display text-xl">{i + 1}</span>
           <span className="flex-1 font-semibold">{r.n}</span>
           <span className="font-display text-sun">{fmt(r.v)}</span>
@@ -138,16 +134,16 @@ function Shop() {
   return (
     <div className="grid grid-cols-2 gap-2">
       {PACKS.map((p) => (
-        <div key={p.name} className="rounded-lg border border-border bg-card p-3 text-center shadow-chunk">
+        <div key={p.name} className="rounded-2xl border-4 border-ink bg-card p-3 text-center shadow-chunk">
           <img src={p.icon} alt="" className="mx-auto h-14 w-14 object-contain" />
           <div className="font-display">{p.name}</div>
           <div className="text-xs">{p.desc}</div>
-          <Button variant="ghost" onClick={() => {
+          <button onClick={() => {
             const ok = p.solo ? s.solo >= p.cost : spend({ coins: p.cost });
             if (!ok) { toast.error("Not enough balance"); return; }
             if (p.solo) grant({ solo: -p.cost });
             grant(p.give); toast.success(`${p.name} bought!`);
-          }} className="chunk-btn mt-2 w-full bg-lime py-1.5 text-sm">{fmt(p.cost)} {p.solo ? "SOLO" : "COINS"}</Button>
+          }} className="chunk-btn mt-2 w-full bg-lime py-1.5 text-sm">{fmt(p.cost)} {p.solo ? "SOLO" : "COINS"}</button>
         </div>
       ))}
     </div>

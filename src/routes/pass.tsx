@@ -21,9 +21,9 @@ function PassPage() {
   const { s } = useGame();
   return (
     <Screen scroll={false}>
-      <div className="pass-page flex h-full flex-col items-center justify-center gap-3 pb-8 text-center">
+      <div className="flex h-full flex-col items-center justify-center gap-3 pb-14 text-center">
         <img src={ART.chest} alt="" className="h-28 w-28 animate-bob object-contain" />
-        <h1 className="font-display text-3xl text-sun text-outline">Spin pass</h1>
+        <h1 className="font-display text-3xl text-sun text-outline">SPIN PASS</h1>
         <p className="font-display text-cream">Level {s.passLevel} · {fmt(s.passXp)}/{fmt(passNeed(s.passLevel))}</p>
         <p className="text-sm text-cream/70">Gifts page coming soon</p>
       </div>
