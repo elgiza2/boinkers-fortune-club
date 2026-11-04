@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { DndContext, DragOverlay, PointerSensor, KeyboardSensor, useSensor, useSensors, useDraggable, useDroppable, closestCenter, type DragEndEvent } from "@dnd-kit/core";
 import { BookOpen, ChevronRight, Gem, LockKeyhole, Plus } from "lucide-react";
 import { toast } from "sonner";
@@ -80,7 +81,7 @@ function Upgrade() {
           <div className="merge-grid">
             {s.mergeBoard.map((level, index) => <Cell key={index} index={index} level={level} selected={selected === index} match={(active !== null || selected !== null) && level !== null && level < 6 && level === s.mergeBoard[active ?? selected ?? -1] && index !== (active ?? selected)} onSelect={() => select(index)} fresh={fresh === index} />)}
           </div>
-          <DragOverlay>{active !== null && s.mergeBoard[active] ? <div className="merge-drag"><Creature level={s.mergeBoard[active] ?? 1} /></div> : null}</DragOverlay>
+          {active !== null && ready ? createPortal(<DragOverlay>{s.mergeBoard[active] ? <div className="merge-drag"><Creature level={s.mergeBoard[active] ?? 1} /></div> : null}</DragOverlay>, document.body) : null}
         </DndContext>
         <div className="merge-capacity">{s.mergeBoard.filter(Boolean).length} / 12</div>
       </section>
