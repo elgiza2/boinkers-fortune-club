@@ -1,4 +1,6 @@
 # Roadmap
+- [ ] Replace NFT favorites gallery with clean artwork, explanation, names and TON buy buttons
+- [ ] Enable real NFT purchase — waiting for deployed sale contract/listings and actual TON prices
 - [x] Standalone wheel without bottom navigation and reference-sized wheel with its own spin button
 - [x] Complete NFT gallery with more than 50 distinct mascot artworks, filtering and details
 - [x] Enlarge wheel and cropped prize artwork, separate amounts and remove duplicated spin control
