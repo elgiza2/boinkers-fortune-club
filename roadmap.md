@@ -1,5 +1,5 @@
 # Roadmap
-- [ ] Enlarge wheel and cropped prize artwork, separate amounts and remove duplicated spin control
+- [x] Enlarge wheel and cropped prize artwork, separate amounts and remove duplicated spin control
 - [x] Increase wheel prizes and refine reference proportions, segments, mascot and stand
 - [x] Remove upgrade title and restyle WHEEL from reference without side extras or bottom event row
 - [x] Simplify Merge Island and replace creatures with the user's golden mascot with natural faces
