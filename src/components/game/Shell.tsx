@@ -78,7 +78,7 @@ export function BottomNav({ center }: { center?: ReactNode }) {
           </div>
         </div>
         <NavItem icon={nftIcon} label="NFT" to="/nft" divider="l" />
-        <NavItem icon={ART.wheel} label="WHEEL" to="/wheel" dot={s.tickets > 0} divider="l" />
+        <NavItem icon={ART.wheel} label="WHEEL" to="/wheel" divider="l" />
       </div>
     </nav>
   );
