@@ -2,12 +2,12 @@ export const BOARD_SIZE = 12;
 export const CHARACTER_COST = 500;
 export const MAX_MERGE_LEVEL = 6;
 export const CHARACTERS = [
-  { name: "Sprout", family: "Woodland", rate: 100 },
-  { name: "Bloom", family: "Woodland", rate: 250 },
-  { name: "Leaf Guardian", family: "Woodland", rate: 625 },
-  { name: "Coral", family: "Coral", rate: 1563 },
-  { name: "Blossom", family: "Coral", rate: 3908 },
-  { name: "Reef Guardian", family: "Coral", rate: 9770 },
+  { name: "Buddy", family: "Buddies", rate: 100 },
+  { name: "Scout", family: "Buddies", rate: 250 },
+  { name: "Hero", family: "Buddies", rate: 625 },
+  { name: "Champion", family: "Royals", rate: 1563 },
+  { name: "Prince", family: "Royals", rate: 3908 },
+  { name: "King", family: "Royals", rate: 9770 },
 ] as const;
 export type Board = (number | null)[];
 export const starterBoard = (): Board => [1, 1, null, null, null, null, null, null, null, null, null, null];

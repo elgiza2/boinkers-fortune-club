@@ -17,7 +17,7 @@ export const Route = createFileRoute("/upgrade")({
     { title: "Merge Island — Solo Slots" },
     { name: "description", content: "Grow your island, merge evolving creatures and collect SOLO." },
     { property: "og:title", content: "Merge Island — Solo Slots" },
-    { property: "og:description", content: "Discover woodland and coral creatures on your merge island." },
+    { property: "og:description", content: "Merge golden buddies, discover new evolutions and collect SOLO." },
     { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" },
   ] }),
   component: Upgrade,
@@ -32,7 +32,7 @@ function Cell({ index, level, selected, match, onSelect, fresh }: { index: numbe
   const { attributes, listeners, setNodeRef: dragRef, isDragging } = useDraggable({ id: index, disabled: !level });
   return <div ref={dropRef} className={`merge-cell ${isOver || selected ? "merge-cell-active" : ""} ${match ? "merge-cell-match" : ""}`}>
     <Button ref={dragRef} variant="ghost" {...attributes} {...listeners} onClick={onSelect} aria-label={level ? `Slot ${index + 1}, ${CHARACTERS[level - 1]?.name}, level ${level}` : `Empty slot ${index + 1}`} className={`merge-cell-button ${isDragging ? "opacity-20" : ""} ${fresh ? "merge-evolve" : ""}`}>
-      {level ? <><Creature level={level} /><span className="merge-level">{level}</span></> : <Plus className="merge-empty" strokeWidth={1.5} />}
+      {level ? <><Creature level={level} /><span className="merge-level">{level}</span></> : <span className="merge-empty" />}
     </Button>
   </div>;
 }
@@ -71,27 +71,24 @@ function Upgrade() {
   return <Screen bare scroll={false}>
     <div className="merge-page">
       <header className="merge-heading">
-        <div className="merge-title"><div className="merge-title-creature"><Creature level={best} /></div><div><p className="merge-eyebrow">YOUR CREATURES</p><h1>Merge Island</h1></div></div>
+        <div className="merge-title"><h1>Merge Island</h1><span className="merge-production"><Gem size={13} />{fmt(soloRate(s))}<small> SOLO / hr</small></span></div>
         <Button variant="ghost" size="icon" className="merge-book" onClick={() => setCollection(true)} aria-label="Creature collection" title="Creature collection"><BookOpen /></Button>
       </header>
-      <div className="merge-production"><span><Gem size={16} /> SOLO production</span><strong>{fmt(soloRate(s))}<small> / hr</small></strong></div>
       <section className="merge-world" aria-label="Merge island board">
-        <span className="merge-family">{best < 4 ? "Woodland family" : "Coral family"}</span>
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={e => { dragged.current = true; setActive(Number(e.active.id)); setSelected(null); }} onDragEnd={end} onDragCancel={() => { setActive(null); dragged.current = false; }}>
           <div className="merge-grid">
             {s.mergeBoard.map((level, index) => <Cell key={index} index={index} level={level} selected={selected === index} match={(active !== null || selected !== null) && level !== null && level < 6 && level === s.mergeBoard[active ?? selected ?? -1] && index !== (active ?? selected)} onSelect={() => select(index)} fresh={fresh === index} />)}
           </div>
           {active !== null && ready ? createPortal(<DragOverlay>{s.mergeBoard[active] ? <div className="merge-drag"><Creature level={s.mergeBoard[active] ?? 1} /></div> : null}</DragOverlay>, document.body) : null}
         </DndContext>
-        <div className="merge-capacity">{s.mergeBoard.filter(Boolean).length} / 12</div>
       </section>
       <Button variant="ghost" className="merge-next" onClick={() => setCollection(true)}>
         <div className="merge-preview"><Creature level={next} silhouette={best < 6} />{best < 6 && <LockKeyhole size={12} />}</div>
-        <div><span>{best === 6 ? "COLLECTION COMPLETE" : next === 4 ? "NEXT FAMILY · CORAL" : "NEXT DISCOVERY"}</span><strong>{nextCreature?.name}</strong></div>
+        <div><span>{best === 6 ? "COMPLETE" : "NEXT"}</span><strong>{nextCreature?.name}</strong></div>
         <span className="merge-next-level">Lv. {next}<ChevronRight size={15} /></span>
       </Button>
       <div className="merge-actions">
-        <Button disabled={!ready || full || s.coins < CHARACTER_COST} className="merge-buy" onClick={() => { setFresh(s.mergeBoard.indexOf(null)); buyMerge(); beep(s.sound, 550); }} aria-label="Buy Sprout for 500 coins"><Plus size={19} /><div><strong>{full ? "Island full" : "Add Sprout"}</strong><span><img src={ART.coin} alt="Coins" width={18} height={18} />{CHARACTER_COST}</span></div></Button>
+        <Button disabled={!ready || full || s.coins < CHARACTER_COST} className="merge-buy" onClick={() => { setFresh(s.mergeBoard.indexOf(null)); buyMerge(); beep(s.sound, 550); }} aria-label="Buy Buddy for 500 coins"><Plus size={19} /><strong>{full ? "Full" : "Buy"}</strong><span><img src={ART.coin} alt="Coins" width={18} height={18} />{CHARACTER_COST}</span></Button>
         <Button disabled={!ready || pendingSolo < 1} className="merge-claim" onClick={() => { const amount = claimSolo(); toast.success(`+${fmt(amount)} SOLO collected`); }} aria-label="Collect SOLO"><Gem size={18} /><div><strong>{fmt(pendingSolo)} SOLO</strong><span>Collect</span></div></Button>
       </div>
     </div>
