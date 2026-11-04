@@ -9,3 +9,4 @@
 - [ ] Pass bar: smaller, custom FREE tag + level badge
 - [ ] Top box: welcome user; show win cleanly after spin
 - [ ] Pass bar tappable -> /pass gifts page (placeholder); level-up claim indicator
+- [ ] 48h rotating event: event token symbol on reels, any hit gives coins + progress, escalating endless gifts, new event/token every 48h
